@@ -1,0 +1,57 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { House } from './house.entity';
+import { CreateHouseDto } from './dto/create-house.dto';
+import { UpdateHouseDto } from './dto/update-house.dto';
+
+@Injectable()
+export class HousesService {
+  constructor(
+    @InjectModel('House') private readonly houseModel: Model<House>,
+  ) {}
+
+  async create(createHouseDto: CreateHouseDto): Promise<House> {
+    const newHouse = new this.houseModel(createHouseDto);
+    return newHouse.save();
+  }
+
+  async findAll(): Promise<House[]> {
+    return this.houseModel.find();
+  }
+
+  // CORRECCIÓN: el frontend original identifica las casas por su `code`
+  // legible (ej. "H-1024"), no por el _id interno de Mongo — así llama a
+  // getHouseByCode/updateHouse/deleteHouse. Usar findById aquí habría
+  // fallado siempre (CastError) porque "code" no es un ObjectId válido.
+  async findOne(code: string): Promise<House> {
+    const house = await this.houseModel.findOne({ code });
+    if (!house) {
+      throw new NotFoundException('Casa no encontrada');
+    }
+    return house;
+  }
+
+  // CORRECCIÓN: en el original este método tenía un `catch` sin `try` y el
+  // método `delete` completo estaba anidado (mal indentado) dentro de este
+  // — es decir, el archivo original no compilaba tal cual estaba.
+  async update(code: string, updateHouseDto: UpdateHouseDto): Promise<House> {
+    const updated = await this.houseModel.findOneAndUpdate(
+      { code },
+      updateHouseDto,
+      { new: true },
+    );
+    if (!updated) {
+      throw new NotFoundException('Casa no encontrada');
+    }
+    return updated;
+  }
+
+  async delete(code: string): Promise<boolean> {
+    const deleted = await this.houseModel.findOneAndDelete({ code });
+    if (!deleted) {
+      throw new NotFoundException('Casa no encontrada');
+    }
+    return true;
+  }
+}

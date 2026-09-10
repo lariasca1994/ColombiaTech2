@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tema oscuro: fondo y color de texto a nivel de página, para que los
+   contenedores sin fondo explícito (formularios, tarjetas) hereden algo
+   razonable incluso antes de que cada componente tenga sus propias
+   variantes dark:. */
+body {
+  @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200;
+}
