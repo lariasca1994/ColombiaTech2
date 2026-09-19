@@ -63,7 +63,7 @@ export default function HouseList(){
                     <td className="border-y-2 px-4 py-2 border-indigo-600">{house.code}</td>
                     <td className="border-y-2 px-4 py-2 border-indigo-600">
                         <img className="size-40 transition-transform duration-1000 transform hover:scale-110 max-w-none"
-                            src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/${house.image}`}/></td>
+                            src={house.image}
                     <td className="border-y-2 px-4 py-2 border-indigo-600">
                     <div className="inline-flex rounded-md shadow-sm" role="group">
                         <Link to={`/house/${house.code}`}

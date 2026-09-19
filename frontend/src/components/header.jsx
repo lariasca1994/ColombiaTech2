@@ -85,7 +85,7 @@ export default function Header() {
           {isAutheticated ? (
             <div className="relative">
               <img
-                src={`${API_URL}/${user.avatar}`}
+                src={user.avatar}
                 className="rounded-full h-10 w-10 cursor-pointer"
                 onClick={toggleMenu}
               />

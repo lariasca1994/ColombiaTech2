@@ -8,18 +8,24 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { UsersService } from '../users/users.service';
 import { HousesService } from '../houses/houses.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-const imageStorage = diskStorage({
-  destination: './uploads',
-  filename: (req, file, callback) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
-  },
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const imageStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async () => ({
+    folder: 'colombiatech2',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+  }),
 });
 
 const imageFileFilter = (req, file, callback) => {
@@ -52,11 +58,10 @@ export class UploadController {
     if (!file) {
       throw new BadRequestException('No se recibió ningún archivo');
     }
-    return this.usersService.update(id, { avatar: file.filename } as any);
+    // Con Cloudinary, file.path ya es la URL pública completa
+    return this.usersService.update(id, { avatar: file.path } as any);
   }
 
-  // Nueva: sube la foto de una casa. Se identifica por su "code" legible,
-  // igual que el resto de operaciones sobre casas.
   @Post(':code/house')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -72,6 +77,6 @@ export class UploadController {
     if (!file) {
       throw new BadRequestException('No se recibió ningún archivo');
     }
-    return this.housesService.update(code, { image: file.filename } as any);
+    return this.housesService.update(code, { image: file.path } as any);
   }
 }
