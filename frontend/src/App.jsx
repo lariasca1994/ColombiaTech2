@@ -15,7 +15,7 @@ import Chat from "./components/chat/Chat";
 import useInactivityLogout from "./hooks/useInactivityLogout";
 
 function InactivityWatcher() {
-  useInactivityLogout(30_000); // cierra sesión sola a los 30s sin actividad
+  useInactivityLogout(4 * 60 * 60 * 1000); // cierra sesión sola a las 4 horas sin actividad
   return null;
 }
 
