@@ -63,8 +63,9 @@ export default function HouseList(){
                     <td className="border-y-2 px-4 py-2 border-indigo-600">{house.code}</td>
                     <td className="border-y-2 px-4 py-2 border-indigo-600">
                         <img className="size-40 transition-transform duration-1000 transform hover:scale-110 max-w-none"
-                            src={house.image}
-                    <td className="border-y-2 px-4 py-2 border-indigo-600">
+    src={house.image}
+/>
+<td className="border-y-2 px-4 py-2 border-indigo-600">
                     <div className="inline-flex rounded-md shadow-sm" role="group">
                         <Link to={`/house/${house.code}`}
                                 className="px-4 py-2 text-sm font-medium text-gray-900 bg-transparent border
