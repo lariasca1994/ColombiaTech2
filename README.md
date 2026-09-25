@@ -22,6 +22,82 @@ sobre la misma base de código, con frontend en React.
 > un período de inactividad. La primera petición tras la suspensión puede
 > tardar entre 30 y 50 segundos en responder mientras el servicio despierta.
 
+## Diagrama de arquitectura
+
+## Arquitectura
+
+```mermaid
+flowchart TB
+    subgraph Usuario["👤 Usuario"]
+        Browser["Navegador Web"]
+    end
+
+    subgraph Vercel["▲ Vercel"]
+        subgraph Frontend["Frontend (React + Vite + TypeScript)"]
+            App["App.tsx<br/>Polling cada 60s"]
+            APIClient["api.ts<br/>fetch()"]
+            Card["ProjectCard"]
+            Spark["Sparkline"]
+        end
+    end
+
+    subgraph Render["☁️ Render (Docker)"]
+        subgraph Backend["Backend (FastAPI + Uvicorn)"]
+            Main["main.py<br/>Rutas REST"]
+            Scheduler["APScheduler"]
+            Status["status.py"]
+            Projects["projects.py"]
+            HTTPX["httpx"]
+            OracleDriver["oracledb"]
+        end
+    end
+
+    subgraph OracleCloud["🗄️ Oracle Cloud"]
+        ADB["Oracle Autonomous Database<br/>Esquema PORTFOLIO_STATUS"]
+    end
+
+    subgraph Externos["🌐 Proyectos del portafolio"]
+        P1["Proyecto 1"]
+        P2["Proyecto 2"]
+        P3["Proyecto N"]
+    end
+
+    Browser -->|HTTPS| App
+    App --> APIClient
+    App --> Card
+    Card --> Spark
+    APIClient -->|REST API| Main
+    Main --> Projects
+    Main --> Status
+    Scheduler --> Status
+    Status --> HTTPX
+    HTTPX -->|GET| P1
+    HTTPX -->|GET| P2
+    HTTPX -->|GET| P3
+    Status --> OracleDriver
+    OracleDriver -->|TCPS| ADB
+    Main --> OracleDriver
+
+    classDef user fill:#e0e0e0,stroke:#333,color:#000;
+    classDef frontend fill:#61dafb,stroke:#333,color:#000;
+    classDef backend fill:#009688,stroke:#333,color:#fff;
+    classDef db fill:#f80000,stroke:#333,color:#fff;
+    classDef external fill:#ff9800,stroke:#333,color:#000;
+
+    class Browser user;
+    class App,APIClient,Card,Spark frontend;
+    class Main,Scheduler,Status,Projects,HTTPX,OracleDriver backend;
+    class ADB db;
+    class P1,P2,P3 external;
+
+    style Vercel fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    style Render fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
+    style OracleCloud fill:#ffebee,stroke:#b71c1c,stroke-width:2px;
+    style Externos fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+    style Frontend fill:#b3e5fc,stroke:#0277bd,stroke-width:1px;
+    style Backend fill:#b2dfdb,stroke:#00695c,stroke-width:1px;
+```
+
 ## Funcionalidades
 
 - Registro e inicio de sesión con JSON Web Tokens
