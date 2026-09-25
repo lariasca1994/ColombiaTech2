@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Put,
   Req,
@@ -16,11 +17,12 @@ import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
-// CORRECCIÓN: antes cualquier usuario autenticado podía ver la lista
-// completa de usuarios y los datos de cualquiera. Ahora un usuario solo
-// puede ver/editar/borrar su propia cuenta — no existe rol de admin en
-// este proyecto, así que "propio" es la única regla.
+// Un usuario normal solo puede ver/editar/borrar su propia cuenta. Un
+// admin (role: 'admin', asignado solo vía src/scripts/crear-admin.ts) puede
+// además ver/editar/borrar cualquier cuenta y suspenderlas o reactivarlas.
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -31,12 +33,17 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  // Ya no existe un endpoint que liste a todos los usuarios.
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get()
+  async findAll(): Promise<User[]> {
+    return this.usersService.findAll();
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req): Promise<User> {
-    this.assertOwnAccount(id, req);
+    this.assertOwnAccountOrAdmin(id, req);
     return this.usersService.findOne(id);
   }
 
@@ -47,19 +54,35 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @Req() req,
   ): Promise<User> {
-    this.assertOwnAccount(id, req);
+    this.assertOwnAccountOrAdmin(id, req);
     return this.usersService.update(id, updateUserDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Param('id') id: string, @Req() req): Promise<boolean> {
-    this.assertOwnAccount(id, req);
+    this.assertOwnAccountOrAdmin(id, req);
     return this.usersService.delete(id);
   }
 
-  private assertOwnAccount(id: string, req: any): void {
-    if (req.user?.userId !== id) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch(':id/suspender')
+  async suspender(@Param('id') id: string): Promise<User> {
+    return this.usersService.setActive(id, false);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch(':id/activar')
+  async activar(@Param('id') id: string): Promise<User> {
+    return this.usersService.setActive(id, true);
+  }
+
+  private assertOwnAccountOrAdmin(id: string, req: any): void {
+    const isOwner = req.user?.userId === id;
+    const isAdmin = req.user?.role === 'admin';
+    if (!isOwner && !isAdmin) {
       throw new ForbiddenException('Solo puedes ver o modificar tu propia cuenta');
     }
   }

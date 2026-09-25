@@ -67,6 +67,16 @@ export class UsersService {
     return true;
   }
 
+  async setActive(id: string, active: boolean): Promise<User> {
+    const updated = await this.userModel
+      .findByIdAndUpdate(id, { active }, { new: true })
+      .select('-password');
+    if (!updated) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    return updated;
+  }
+
   private stripPassword(user: any): User {
     const plain = user.toObject ? user.toObject() : user;
     delete plain.password;

@@ -11,6 +11,7 @@ export interface AuthResult {
     lastname?: string;
     email: string;
     avatar?: string;
+    role: string;
   };
 }
 
@@ -32,7 +33,15 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    const payload = { sub: user._id.toString(), email: user.email };
+    if (user.active === false) {
+      throw new UnauthorizedException('Esta cuenta fue suspendida');
+    }
+
+    const payload = {
+      sub: user._id.toString(),
+      email: user.email,
+      role: user.role,
+    };
     const token = await this.jwtService.signAsync(payload);
 
     return {
@@ -43,6 +52,7 @@ export class AuthService {
         lastname: user.lastname,
         email: user.email,
         avatar: user.avatar,
+        role: user.role,
       },
     };
   }

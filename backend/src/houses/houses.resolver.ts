@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { HousesService } from './houses.service';
 import { House } from './house.entity';
@@ -24,8 +24,8 @@ export class HousesResolver {
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => House)
-  createHouse(@Args('input') input: CreateHouseDto) {
-    return this.housesService.create(input);
+  createHouse(@Args('input') input: CreateHouseDto, @Context() context) {
+    return this.housesService.create(input, context.req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -33,13 +33,20 @@ export class HousesResolver {
   updateHouse(
     @Args('code') code: string,
     @Args('input') input: UpdateHouseDto,
+    @Context() context,
   ) {
-    return this.housesService.update(code, input);
+    return this.housesService.update(code, input, {
+      userId: context.req.user.userId,
+      isAdmin: context.req.user.role === 'admin',
+    });
   }
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Boolean)
-  deleteHouse(@Args('code') code: string) {
-    return this.housesService.delete(code);
+  deleteHouse(@Args('code') code: string, @Context() context) {
+    return this.housesService.delete(code, {
+      userId: context.req.user.userId,
+      isAdmin: context.req.user.role === 'admin',
+    });
   }
 }

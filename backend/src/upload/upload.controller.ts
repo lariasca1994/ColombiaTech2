@@ -2,10 +2,12 @@ import {
   Controller,
   Post,
   Param,
+  Req,
   UseInterceptors,
   UploadedFile,
   UseGuards,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { v2 as cloudinary } from 'cloudinary';
@@ -54,9 +56,16 @@ export class UploadController {
   async uploadUserAvatar(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
+    @Req() req,
   ) {
     if (!file) {
       throw new BadRequestException('No se recibió ningún archivo');
+    }
+    // CORRECCIÓN: antes este endpoint no chequeaba que id fuera el propio
+    // usuario -- cualquiera autenticado podía cambiarle el avatar a
+    // cualquier otro. Mismo criterio que UsersController.
+    if (req.user?.userId !== id && req.user?.role !== 'admin') {
+      throw new ForbiddenException('Solo puedes cambiar tu propio avatar');
     }
     // Con Cloudinary, file.path ya es la URL pública completa
     return this.usersService.update(id, { avatar: file.path } as any);
@@ -73,10 +82,14 @@ export class UploadController {
   async uploadHouseImage(
     @Param('code') code: string,
     @UploadedFile() file: Express.Multer.File,
+    @Req() req,
   ) {
     if (!file) {
       throw new BadRequestException('No se recibió ningún archivo');
     }
-    return this.housesService.update(code, { image: file.path } as any);
+    return this.housesService.update(code, { image: file.path } as any, {
+      userId: req.user.userId,
+      isAdmin: req.user.role === 'admin',
+    });
   }
 }

@@ -40,4 +40,7 @@ export class House {
 
   @Field({ nullable: true })
   image?: string;
+
+  @Field({ nullable: true })
+  ownerId?: string;
 }

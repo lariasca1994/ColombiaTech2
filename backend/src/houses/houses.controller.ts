@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { House } from './house.entity';
@@ -28,8 +29,11 @@ export class HousesController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @HttpCode(201)
-  async create(@Body() createHouseDto: CreateHouseDto): Promise<House> {
-    return this.housesService.create(createHouseDto);
+  async create(
+    @Body() createHouseDto: CreateHouseDto,
+    @Req() req,
+  ): Promise<House> {
+    return this.housesService.create(createHouseDto, req.user.userId);
   }
 
   @Get()
@@ -47,13 +51,20 @@ export class HousesController {
   async update(
     @Param('code') code: string,
     @Body() updateHouseDto: UpdateHouseDto,
+    @Req() req,
   ): Promise<House> {
-    return this.housesService.update(code, updateHouseDto);
+    return this.housesService.update(code, updateHouseDto, {
+      userId: req.user.userId,
+      isAdmin: req.user.role === 'admin',
+    });
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':code')
-  async delete(@Param('code') code: string): Promise<boolean> {
-    return this.housesService.delete(code);
+  async delete(@Param('code') code: string, @Req() req): Promise<boolean> {
+    return this.housesService.delete(code, {
+      userId: req.user.userId,
+      isAdmin: req.user.role === 'admin',
+    });
   }
 }
