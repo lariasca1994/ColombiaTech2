@@ -22,19 +22,18 @@ sobre la misma base de código, con frontend en React.
 > un período de inactividad. La primera petición tras la suspensión puede
 > tardar entre 30 y 50 segundos en responder mientras el servicio despierta.
 
-## Diagrama de arquitectura
-
 ## Arquitectura
 
 ```mermaid
 flowchart TB
+
     subgraph Usuario["👤 Usuario"]
         Browser["Navegador Web"]
     end
 
     subgraph Vercel["▲ Vercel"]
-        subgraph Frontend["Frontend (React + Vite + TypeScript)"]
-            App["App.tsx<br/>Polling cada 60s"]
+        subgraph Frontend["Frontend — React 18 · Vite 6 · TypeScript"]
+            App["App.tsx<br/>Polling cada 60 s"]
             APIClient["api.ts<br/>fetch()"]
             Card["ProjectCard"]
             Spark["Sparkline"]
@@ -42,7 +41,7 @@ flowchart TB
     end
 
     subgraph Render["☁️ Render (Docker)"]
-        subgraph Backend["Backend (FastAPI + Uvicorn)"]
+        subgraph Backend["Backend — FastAPI · Uvicorn"]
             Main["main.py<br/>Rutas REST"]
             Scheduler["APScheduler"]
             Status["status.py"]
@@ -62,6 +61,7 @@ flowchart TB
         P3["Proyecto N"]
     end
 
+    %% ---- Flujo de datos ----
     Browser -->|HTTPS| App
     App --> APIClient
     App --> Card
@@ -78,24 +78,34 @@ flowchart TB
     OracleDriver -->|TCPS| ADB
     Main --> OracleDriver
 
-    classDef user fill:#e0e0e0,stroke:#333,color:#000;
-    classDef frontend fill:#61dafb,stroke:#333,color:#000;
-    classDef backend fill:#009688,stroke:#333,color:#fff;
-    classDef db fill:#f80000,stroke:#333,color:#fff;
-    classDef external fill:#ff9800,stroke:#333,color:#000;
+    %% ---- Colores de marca (Brand Colors) ----
+    classDef react fill:#61DAFB,stroke:#20232A,stroke-width:2px,color:#20232A;
+    classDef vite fill:#BD34FE,stroke:#20232A,stroke-width:2px,color:#FFFFFF;
+    classDef typescript fill:#3178C6,stroke:#00273F,stroke-width:2px,color:#FFFFFF;
+    classDef fastapi fill:#009688,stroke:#004D40,stroke-width:2px,color:#FFFFFF;
+    classDef oracle fill:#F80000,stroke:#7F0000,stroke-width:2px,color:#FFFFFF;
+    classDef vercel fill:#000000,stroke:#333333,stroke-width:2px,color:#FFFFFF;
+    classDef render fill:#8A05FF,stroke:#4A008C,stroke-width:2px,color:#FFFFFF;
+    classDef docker fill:#2496ED,stroke:#0B6FC2,stroke-width:2px,color:#FFFFFF;
+    classDef python fill:#3572A5,stroke:#1A3A5C,stroke-width:2px,color:#FFFFFF;
+    classDef neutral fill:#F5F5F5,stroke:#CCCCCC,stroke-width:1px,color:#333333;
 
-    class Browser user;
-    class App,APIClient,Card,Spark frontend;
-    class Main,Scheduler,Status,Projects,HTTPX,OracleDriver backend;
-    class ADB db;
-    class P1,P2,P3 external;
+    class Browser neutral;
+    class App,APIClient,Card,Spark react;
+    class Main,Scheduler,Status,Projects fastapi;
+    class HTTPX,OracleDriver python;
+    class ADB oracle;
+    class P1,P2,P3 neutral;
 
-    style Vercel fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    style Render fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
-    style OracleCloud fill:#ffebee,stroke:#b71c1c,stroke-width:2px;
-    style Externos fill:#fff3e0,stroke:#e65100,stroke-width:2px;
-    style Frontend fill:#b3e5fc,stroke:#0277bd,stroke-width:1px;
-    style Backend fill:#b2dfdb,stroke:#00695c,stroke-width:1px;
+    %% ---- Estilos de subgráficos ----
+    style Usuario fill:#FAFAFA,stroke:#DDDDDD,stroke-width:1px;
+    style Vercel fill:#F0F0F0,stroke:#000000,stroke-width:2px,stroke-dasharray:5 5;
+    style Render fill:#F3E8FF,stroke:#8A05FF,stroke-width:2px,stroke-dasharray:5 5;
+    style OracleCloud fill:#FFF0F0,stroke:#F80000,stroke-width:2px,stroke-dasharray:5 5;
+    style Externos fill:#FFF8E1,stroke:#FFB300,stroke-width:1px,stroke-dasharray:3 3;
+
+    style Frontend fill:#E1F5FE,stroke:#61DAFB,stroke-width:1px;
+    style Backend fill:#E0F2F1,stroke:#009688,stroke-width:1px;
 ```
 
 ## Funcionalidades
