@@ -24,6 +24,14 @@ sobre la misma base de código, con frontend en React.
 
 ## Arquitectura
 
+```
+Cliente (React) ──HTTP/REST──▶ NestJS ──▶ MongoDB
+       │         ──GraphQL──▶  (Apollo, code-first)
+       └─────────WebSocket───▶  Socket.IO Gateway
+```
+
+## Diagrama de Arquitectura
+
 ```mermaid
 flowchart TB
 
@@ -117,14 +125,6 @@ flowchart TB
 - Acceso restringido: cada usuario solo alcanza su propia información
 - Chat en tiempo real mediante WebSockets
 - Misma información disponible por REST y por GraphQL
-
-## Arquitectura
-
-```
-Cliente (React) ──HTTP/REST──▶ NestJS ──▶ MongoDB
-       │         ──GraphQL──▶  (Apollo, code-first)
-       └─────────WebSocket───▶  Socket.IO Gateway
-```
 
 Un único backend NestJS sirve las tres interfaces (REST, GraphQL y
 WebSockets) sobre los mismos módulos de dominio, evitando duplicar lógica de
