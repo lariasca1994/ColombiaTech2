@@ -1,16 +1,33 @@
 # ColombiaTech2
 
-![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat&logo=nestjs&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat&logo=mongodb&logoColor=white)
-![GraphQL](https://img.shields.io/badge/GraphQL-E10098?style=flat&logo=graphql&logoColor=white)
-![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
-![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=flat&logo=socketdotio&logoColor=white)
+<p>
+  <a href="https://colombia-tech2.vercel.app"><img src="docs/demo-badge.svg" alt="Abrir la demo en vivo" height="32"></a>
+  <a href="https://frontend-nine-topaz-99.vercel.app"><img src="https://portafolio-status.onrender.com/api/status/colombiatech2/badge.svg" alt="Estado en vivo del proyecto" height="32"></a>
+  <a href="https://d4i3vsgw7xwmh.cloudfront.net"><img src="https://portafolio-status.onrender.com/api/status/colombiatech2/qa-badge.svg" alt="Fecha y resultado de la última prueba E2E" height="32"></a>
+</p>
+
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![GraphQL](https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=white)
 
 Plataforma de alquiler de vivienda con chat en tiempo real entre interesado y
 arrendador. Backend unificado en NestJS que expone REST, GraphQL y WebSockets
 sobre la misma base de código, con frontend en React.
+
+### En pocas palabras
+
+- **Qué hace:** quien busca vivienda puede ver inmuebles publicados y hablar por
+  chat, en tiempo real, con el arrendador. El arrendador publica sus inmuebles
+  con fotos.
+- **Qué lo hace interesante:** un solo backend atiende tres formas de consumir
+  los mismos datos —REST, GraphQL y WebSockets— sin duplicar lógica.
+- **Cómo probarlo:** entra a la [demo](https://colombia-tech2.vercel.app), crea
+  una cuenta y publica o busca un inmueble. Para correrlo en tu equipo, ve a
+  [Ejecución](#ejecución).
 
 ## Demo en vivo
 
@@ -24,97 +41,17 @@ sobre la misma base de código, con frontend en React.
 
 ## Arquitectura
 
-```
-Cliente (React) ──HTTP/REST──▶ NestJS ──▶ MongoDB
-       │         ──GraphQL──▶  (Apollo, code-first)
-       └─────────WebSocket───▶  Socket.IO Gateway
-```
+<p align="center">
+  <img src="docs/arquitectura.svg" alt="Diagrama de arquitectura: frontend React en Vercel, backend NestJS en Render con REST, GraphQL y WebSockets, MongoDB Atlas y Cloudinary" width="100%">
+</p>
 
-## Diagrama de Arquitectura
-
-```mermaid
-flowchart TB
-
-    subgraph Usuario["👤 Usuario"]
-        Browser["Navegador Web"]
-    end
-
-    subgraph Vercel["▲ Vercel"]
-        subgraph Frontend["Frontend — React 18 · Vite 6 · TypeScript"]
-            App["App.tsx<br/>Polling cada 60 s"]
-            APIClient["api.ts<br/>fetch()"]
-            Card["ProjectCard"]
-            Spark["Sparkline"]
-        end
-    end
-
-    subgraph Render["☁️ Render (Docker)"]
-        subgraph Backend["Backend — FastAPI · Uvicorn"]
-            Main["main.py<br/>Rutas REST"]
-            Scheduler["APScheduler"]
-            Status["status.py"]
-            Projects["projects.py"]
-            HTTPX["httpx"]
-            OracleDriver["oracledb"]
-        end
-    end
-
-    subgraph OracleCloud["🗄️ Oracle Cloud"]
-        ADB["Oracle Autonomous Database<br/>Esquema PORTFOLIO_STATUS"]
-    end
-
-    subgraph Externos["🌐 Proyectos del portafolio"]
-        P1["Proyecto 1"]
-        P2["Proyecto 2"]
-        P3["Proyecto N"]
-    end
-
-    %% ---- Flujo de datos ----
-    Browser -->|HTTPS| App
-    App --> APIClient
-    App --> Card
-    Card --> Spark
-    APIClient -->|REST API| Main
-    Main --> Projects
-    Main --> Status
-    Scheduler --> Status
-    Status --> HTTPX
-    HTTPX -->|GET| P1
-    HTTPX -->|GET| P2
-    HTTPX -->|GET| P3
-    Status --> OracleDriver
-    OracleDriver -->|TCPS| ADB
-    Main --> OracleDriver
-
-    %% ---- Colores de marca (Brand Colors) ----
-    classDef react fill:#61DAFB,stroke:#20232A,stroke-width:2px,color:#20232A;
-    classDef vite fill:#BD34FE,stroke:#20232A,stroke-width:2px,color:#FFFFFF;
-    classDef typescript fill:#3178C6,stroke:#00273F,stroke-width:2px,color:#FFFFFF;
-    classDef fastapi fill:#009688,stroke:#004D40,stroke-width:2px,color:#FFFFFF;
-    classDef oracle fill:#F80000,stroke:#7F0000,stroke-width:2px,color:#FFFFFF;
-    classDef vercel fill:#000000,stroke:#333333,stroke-width:2px,color:#FFFFFF;
-    classDef render fill:#8A05FF,stroke:#4A008C,stroke-width:2px,color:#FFFFFF;
-    classDef docker fill:#2496ED,stroke:#0B6FC2,stroke-width:2px,color:#FFFFFF;
-    classDef python fill:#3572A5,stroke:#1A3A5C,stroke-width:2px,color:#FFFFFF;
-    classDef neutral fill:#F5F5F5,stroke:#CCCCCC,stroke-width:1px,color:#333333;
-
-    class Browser neutral;
-    class App,APIClient,Card,Spark react;
-    class Main,Scheduler,Status,Projects fastapi;
-    class HTTPX,OracleDriver python;
-    class ADB oracle;
-    class P1,P2,P3 neutral;
-
-    %% ---- Estilos de subgráficos ----
-    style Usuario fill:#FAFAFA,stroke:#DDDDDD,stroke-width:1px;
-    style Vercel fill:#F0F0F0,stroke:#000000,stroke-width:2px,stroke-dasharray:5 5;
-    style Render fill:#F3E8FF,stroke:#8A05FF,stroke-width:2px,stroke-dasharray:5 5;
-    style OracleCloud fill:#FFF0F0,stroke:#F80000,stroke-width:2px,stroke-dasharray:5 5;
-    style Externos fill:#FFF8E1,stroke:#FFB300,stroke-width:1px,stroke-dasharray:3 3;
-
-    style Frontend fill:#E1F5FE,stroke:#61DAFB,stroke-width:1px;
-    style Backend fill:#E0F2F1,stroke:#009688,stroke-width:1px;
-```
+- **Vercel** sirve la aplicación React (Vite + Redux Toolkit + Tailwind) y el
+  cliente de chat.
+- **Render** corre el backend NestJS: las rutas REST (`/api`), GraphQL
+  (`/graphql`) y el gateway de chat (Socket.IO) llegan a los mismos módulos de
+  dominio, protegidos con JWT.
+- **MongoDB Atlas** guarda usuarios, inmuebles y mensajes; **Cloudinary**, las
+  imágenes.
 
 ## Funcionalidades
 
