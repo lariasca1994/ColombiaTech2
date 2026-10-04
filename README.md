@@ -35,7 +35,7 @@ sobre la misma base de código, con frontend en React.
 - **API REST:** `https://colombiatech2.onrender.com/api`
 - **GraphQL Playground:** `https://colombiatech2.onrender.com/graphql`
 
-> El backend corre en el plan gratuito de Render, que suspende el servicio tras
+> El backend corre en Render, que suspende el servicio tras
 > un período de inactividad. La primera petición tras la suspensión puede
 > tardar entre 30 y 50 segundos en responder mientras el servicio despierta.
 
@@ -105,7 +105,7 @@ Socket.IO client
 - Node.js 18 o superior
 - npm
 - Una instancia de MongoDB accesible
-- Una cuenta de Cloudinary (plan gratuito) para la carga de imágenes
+- Una cuenta de Cloudinary para la carga de imágenes
 
 ## Ejecución
 
@@ -143,7 +143,7 @@ El `.env` necesita la URL del backend. Queda en `http://localhost:5173`.
 
 ## Despliegue
 
-El backend está preparado para Render, que en su plan gratuito admite conexiones
+El backend está preparado para Render, que admite conexiones
 WebSocket persistentes. El frontend, para Vercel.
 
 Ambos requieren definir las mismas variables de entorno del `.env` en el panel
