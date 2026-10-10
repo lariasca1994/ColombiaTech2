@@ -1,9 +1,16 @@
 import { useState } from "react";
 import { useLoginMutation } from "../../features/api/apiSlice";
 import Swal from 'sweetalert2'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { loginSuccess } from "../../features/authSlice";
+import Portada from "./Portada";
+
+// Los textos "Email", "Password", "Iniciar Sesion" y "Datos Invalidos" los
+// usa la prueba E2E de qa-evidencia: cambiarlos rompe esa prueba.
+const CAMPO = "w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 " +
+    "text-gray-900 dark:text-gray-100 px-3.5 py-2.5 text-base focus:outline-none focus:border-emerald-600 " +
+    "focus:ring-4 focus:ring-emerald-600/15";
 
 export default function Login() {
 
@@ -33,7 +40,7 @@ export default function Login() {
                     showConfirmButton: false,
                     timer: 1500
                 }).then(() => {
-                    navigate('/') // CORRECCIÓN: /user (la lista) ya no existe como ruta
+                    navigate('/house')
                 });
             }
         } catch (error) {
@@ -42,43 +49,30 @@ export default function Login() {
     }
 
     return (
-        <div className="max-w-lg w-full mx-auto px-5 py-5">
-            {!error ? null :
-                (<div className="flex justify-center bg-slate-100 dark:bg-slate-800 text-red-500 dark:text-red-400 font-bold">
+        <Portada
+            paso="Acceso"
+            titulo="Iniciar sesión"
+            subtitulo="Entra para ver las casas publicadas y conversar con otros usuarios."
+        >
+            {error && (
+                <div role="alert" className="mb-4 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-sm font-semibold px-3.5 py-2.5">
                     Datos Invalidos
                 </div>
-                )}
-            <form onSubmit={handleSubmit} className="shadow-md rounded pt-6 pb-10 mb-4 px-10 bg-white dark:bg-gray-800">
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2" htmlFor="email">Email</label>
-                    <input type="email"
-                        required
-                        name="email"
-                        placeholder="Email"
-                        className="shadow appearance-none border rounded w-full focus:shadow-outline
-                                    bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600
-                                    disabled:bg-slate-50 dark:disabled:bg-gray-800 disabled:text-slate-500
-                                    disabled:border-slate-200 disabled:shadow-none
-                                    invalid:border-pink-500 invalid:text-pink-600
-                                    focus:invalid:border-pink-500 focus:invalid:ring-pink-500" />
+            )}
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5" htmlFor="email">Correo</label>
+                    <input type="email" id="email" required name="email" placeholder="Email" autoComplete="username" className={CAMPO} />
                 </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2" htmlFor="password">Password</label>
-                    <input type="password"
-                        required
-                        minLength="3"
-                        name="password"
-                        placeholder="Password"
-                        className="shadow appearance-none border rounded w-full focus:shadow-outline
-                                    bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600
-                                    disabled:bg-slate-50 dark:disabled:bg-gray-800 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-                                    invalid:border-pink-500 invalid:text-pink-600
-                                    focus:invalid:border-pink-500 focus:invalid:ring-pink-500" />
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5" htmlFor="password">Contraseña</label>
+                    <input type="password" id="password" required minLength="3" name="password" placeholder="Password" autoComplete="current-password" className={CAMPO} />
                 </div>
-                <div className="flex justify-center">
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 rounded text-white font-bold py-2 px-4">Iniciar Sesion</button>
-                </div>
+                <button type="submit" className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3">Iniciar Sesion</button>
             </form>
-        </div>
+            <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                ¿No tienes cuenta? <Link to="/create-user" className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">Crea una</Link>
+            </p>
+        </Portada>
     );
 }

@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import "./App.css";
 import Footer from "./components/footer";
 import Header from "./components/header";
@@ -10,7 +11,6 @@ import PrivateRoute from "./components/PrivateRoute";
 import ChangePassword from "./components/auth/ChangePassword";
 import HouseFormCreate from "./components/house/HouseFormCreate";
 import HouseFormEdit from "./components/house/HouseFormEdit";
-import Home from "./components/Home";
 import Chat from "./components/chat/Chat";
 import useInactivityLogout from "./hooks/useInactivityLogout";
 
@@ -19,16 +19,26 @@ function InactivityWatcher() {
   return null;
 }
 
-function App() {
+// La portada de acceso ocupa toda la pantalla: sin cabecera ni pie.
+const RUTAS_PORTADA = ["/", "/login"];
+
+/** Inicio: la portada de acceso es la primera pantalla, igual que en el
+ *  resto del portafolio; con sesión iniciada se va directo a las casas. */
+function Inicio() {
+  const isAutheticated = useSelector((state) => state.auth.isAutheticated);
+  return isAutheticated ? <Navigate to="/house" replace /> : <Login />;
+}
+
+function Marco() {
+  const { pathname } = useLocation();
+  const esPortada = RUTAS_PORTADA.includes(pathname);
+
   return (
-    <BrowserRouter>
-          <InactivityWatcher />
-      <Header />
+    <>
+      <InactivityWatcher />
+      {!esPortada && <Header />}
       <Routes>
-        {/* Inicio: pública a propósito. Cualquier visitante (sin sesión
-            incluido) debe poder ver de qué trata el proyecto antes de
-            que se le pida loguearse. */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Inicio />} />
 
         {/* Sección: Casas */}
         <Route path="/house" element={<PrivateRoute Component={HouseList} />} />
@@ -46,7 +56,15 @@ function App() {
         <Route path="/create-user" element={<UserFormCreate />} />
         <Route path="/login" element={<Login />} />
       </Routes>
-      <Footer />
+      {!esPortada && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Marco />
     </BrowserRouter>
   );
 }

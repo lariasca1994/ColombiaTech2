@@ -1,0 +1,45 @@
+/* Animaciones de la portada: las casas suben una tras otra y luego llega
+   el mensaje de chat. El resto del diseño está en clases de Tailwind. */
+.portada-marca::before {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgb(4 120 87 / 0.12) 1px, transparent 1.5px);
+  background-size: 20px 20px;
+  content: "";
+  pointer-events: none;
+}
+
+.portada-casa {
+  opacity: 0;
+  animation: portada-subir 0.5s ease-out forwards;
+  animation-delay: var(--retraso);
+}
+
+.portada-mensaje {
+  opacity: 0;
+  transform-origin: bottom right;
+  animation: portada-llegar 0.4s ease-out 1.2s forwards;
+}
+
+@keyframes portada-subir {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes portada-llegar {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+
+/* El botón de tema respeta el notch (en celular queda fijo arriba). */
+.portada-tema {
+  top: calc(1.25rem + env(safe-area-inset-top, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portada-casa,
+  .portada-mensaje {
+    opacity: 1;
+    animation: none;
+  }
+}
