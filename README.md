@@ -184,6 +184,14 @@ La sesión se cierra sola tras 4 horas sin actividad.
   - **Logout:** cierra la sesión.
 - El botón 🌙 / ☀️ alterna entre tema oscuro y claro.
 
+### Si el servicio no responde
+
+Si la API o la base de datos (MongoDB Atlas) no responden, la aplicación muestra una **pantalla de mantenimiento** con los colores del proyecto, en lugar de un error genérico o de una página que no carga.
+
+- **Servidor:** Si MongoDB no está conectado, la API responde **503** al instante (con CORS) en vez de colgarse ~10 s y terminar en 500. Nuevo `GET /health`: 200 solo con la base arriba.
+- **Pantalla:** Un middleware de Redux (`src/features/mantenimiento.js`) detecta fallos de las APIs propias (sin conexión o 502/503/504; la API externa de Colombia no cuenta) y `src/components/Mantenimiento.jsx` muestra la pantalla.
+- **Recuperación:** Consulta `/health` cada 15 s y recarga la página sola cuando la API y la base vuelven. No reintenta acciones del usuario, para no duplicarlas.
+
 ---
 
 ## 6. Instalación para pruebas

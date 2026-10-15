@@ -175,3 +175,5 @@ solo el dueño o un administrador puede modificarla.
 
 **¿Por qué la contraseña no me deja registrarme?** Revisa que tenga 8 caracteres o más, con
 mayúscula, minúscula, número y un carácter especial (por ejemplo `#` o `!`).
+
+**¿Qué significa la pantalla "Estamos en mantenimiento"?** El servicio o su base de datos no están respondiendo en ese momento. No se perdió nada: tus casas, mensajes y tu cuenta siguen guardados, y ninguna acción quedó a medias (si no viste la confirmación, no se guardó). La pantalla se actualiza sola y vuelve a la normalidad apenas el servicio responda; también puedes reintentar más tarde.
