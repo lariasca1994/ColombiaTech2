@@ -7,6 +7,7 @@ import { apiSlice } from './features/api/apiSlice';
 import { apiHousesSlice } from './features/api/apiHousesSlice';
 import { apiColombiaSlice } from './features/api/apiColombiaSlice';
 import { apiMessageSlice } from './features/api/apiMessageSlice';
+import { vigilarMantenimiento } from './features/mantenimiento';
 
 /** Agrupamos los estados en una sola ubicacion */
 
@@ -26,7 +27,8 @@ const store = configureStore({
         .concat(apiSlice.middleware)
         .concat(apiHousesSlice.middleware)
         .concat(apiMessageSlice.middleware)
-        .concat(apiColombiaSlice.middleware),
+        .concat(apiColombiaSlice.middleware)
+        .concat(vigilarMantenimiento),
 })
 
 export default store;

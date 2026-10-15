@@ -13,6 +13,7 @@ import HouseFormCreate from "./components/house/HouseFormCreate";
 import HouseFormEdit from "./components/house/HouseFormEdit";
 import Chat from "./components/chat/Chat";
 import useInactivityLogout from "./hooks/useInactivityLogout";
+import Mantenimiento from "./components/Mantenimiento";
 
 function InactivityWatcher() {
   useInactivityLogout(4 * 60 * 60 * 1000); // cierra sesión sola a las 4 horas sin actividad
@@ -36,6 +37,7 @@ function Marco() {
   return (
     <>
       <InactivityWatcher />
+      <Mantenimiento />
       {!esPortada && <Header />}
       <Routes>
         <Route path="/" element={<Inicio />} />
