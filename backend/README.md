@@ -43,6 +43,9 @@ npm run start:dev
 - REST: `http://localhost:3000/house`, `/users`, `/messages`, `/auth/login`
 - GraphQL Playground: `http://localhost:3000/graphql`
 - WebSocket del chat: mismo puerto, evento `message` / `message-receipt`
+- Salud: `http://localhost:3000/health` → 200 `{"status":"ok"}` solo si MongoDB está conectado.
+  Si la base no responde, toda la API responde **503** con `mantenimiento: true` (el frontend
+  muestra su pantalla de mantenimiento y consulta `/health` hasta que vuelve).
 
 ## ⚠️ Nota de transparencia
 
