@@ -241,6 +241,15 @@ El backend está preparado para Render y el frontend para Vercel. Ambos
 requieren definir las mismas variables de entorno del `.env` en el panel del
 proveedor.
 
+Los dos se despliegan desde GitHub con cada push a `main`:
+
+- **Frontend:** Vercel está conectado al repo (carpeta `frontend/`) y publica solo.
+- **Backend:** el workflow `.github/workflows/desplegar-backend.yml` pide a Render
+  desplegar el commit cuando cambia `backend/`, espera a que quede activo y
+  comprueba `/health`. Se hace así porque Render no recibe los avisos de push de
+  este repo. Necesita el secreto de repositorio `RENDER_API_KEY`; también se puede
+  lanzar a mano desde la pestaña Actions.
+
 ---
 
 ## 7. Autor y licencia
