@@ -1,0 +1,76 @@
+# Despliegue del backend (NestJS en Render) desde GitHub.
+#
+# Render no recibe los avisos de push de este repo (su auto-deploy nunca se
+# dispara, aunque esté activado), así que el despliegue lo ordena GitHub:
+# en cada push a main que toque backend/, se pide a Render desplegar ese
+# commit, se espera a que quede "live" y se comprueba /health.
+#
+# Requiere el secreto de repositorio RENDER_API_KEY (Settings → Secrets and
+# variables → Actions). El frontend (Vercel) ya se despliega solo desde GitHub.
+name: Desplegar backend
+
+on:
+  push:
+    branches: [main]
+    paths: ['backend/**', '.github/workflows/desplegar-backend.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: desplegar-backend
+  cancel-in-progress: false
+
+env:
+  SERVICIO: srv-d9lms9e7bikc739bbct0 # ColombiaTech2 (Render)
+  URL_API: https://colombiatech2.onrender.com
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Pedir a Render el despliegue de este commit
+        id: deploy
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RENDER_API_KEY}" ]; then
+            echo "::error::Falta el secreto RENDER_API_KEY en el repositorio."
+            exit 1
+          fi
+          respuesta=$(curl -sS -X POST "https://api.render.com/v1/services/${SERVICIO}/deploys" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
+            -d "{\"commitId\":\"${GITHUB_SHA}\",\"clearCache\":\"do_not_clear\"}")
+          id=$(echo "$respuesta" | jq -r '.id // empty')
+          if [ -z "$id" ]; then
+            echo "::error::Render no aceptó el despliegue: $respuesta"
+            exit 1
+          fi
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+          echo "Despliegue $id del commit ${GITHUB_SHA::7}"
+
+      - name: Esperar a que quede activo
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            estado=$(curl -sS "https://api.render.com/v1/services/${SERVICIO}/deploys/${{ steps.deploy.outputs.id }}" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" | jq -r '.status')
+            echo "estado: $estado"
+            case "$estado" in
+              live) exit 0 ;;
+              build_failed|update_failed|canceled|deactivated|pre_deploy_failed)
+                echo "::error::El despliegue terminó en $estado"; exit 1 ;;
+            esac
+            sleep 15
+          done
+          echo "::error::El despliegue no terminó a tiempo"; exit 1
+
+      - name: Comprobar /health
+        run: |
+          for i in $(seq 1 12); do
+            if curl -fsS "${URL_API}/health"; then echo; exit 0; fi
+            sleep 10
+          done
+          echo "::error::/health no respondió 200"; exit 1
