@@ -46,8 +46,8 @@ sobre la misma base de código, con frontend en React.
 ### Demo en vivo
 
 - **Aplicación:** [colombia-tech2.vercel.app](https://colombia-tech2.vercel.app)
-- **API REST:** `https://colombiatech2.onrender.com/api`
-- **GraphQL Playground:** `https://colombiatech2.onrender.com/graphql`
+- **API REST:** `https://colombiatech2-api.onrender.com/api`
+- **GraphQL Playground:** `https://colombiatech2-api.onrender.com/graphql`
 
 > El backend corre en Render, que suspende el servicio tras
 > un período de inactividad. La primera petición tras la suspensión puede

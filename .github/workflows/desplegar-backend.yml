@@ -20,8 +20,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  SERVICIO: srv-d9lms9e7bikc739bbct0 # ColombiaTech2 (Render)
-  URL_API: https://colombiatech2.onrender.com
+  SERVICIO: srv-dbbp4flpkucs73ead110 # ColombiaTech2 (Render, Virginia)
+  URL_API: https://colombiatech2-api.onrender.com
 
 jobs:
   desplegar:
