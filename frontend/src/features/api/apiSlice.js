@@ -59,6 +59,15 @@ export const apiSlice = createApi({
                 method: 'POST',
                 body: body
             })
+        }),
+        recuperar: builder.mutation({
+            query: (body) => ({ url: 'auth/recuperar', method: 'POST', body })
+        }),
+        restablecer: builder.mutation({
+            query: (body) => ({ url: 'auth/restablecer', method: 'POST', body })
+        }),
+        cambiarContrasena: builder.mutation({
+            query: (body) => ({ url: 'auth/cambiar-contrasena', method: 'POST', body })
         })
     })
 })
@@ -70,5 +79,8 @@ export const { useGetUserByIdQuery,
     useUpdateUserMutation,
     useDeleteUserMutation,
     useUploadAvatarMutation,
-    useLoginMutation
+    useLoginMutation,
+    useRecuperarMutation,
+    useRestablecerMutation,
+    useCambiarContrasenaMutation
 } = apiSlice

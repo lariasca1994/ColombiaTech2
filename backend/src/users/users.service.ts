@@ -49,9 +49,27 @@ export class UsersService {
     return this.userModel.findOne({ email }).select('+password') as any;
   }
 
+  async findByIdWithPassword(id: string): Promise<(User & { _id: any }) | null> {
+    try {
+      return (await this.userModel.findById(id).select('+password')) as any;
+    } catch {
+      return null; // id con formato inválido
+    }
+  }
+
+  async setPassword(id: string, password: string): Promise<void> {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await this.userModel.findByIdAndUpdate(id, { password: hashedPassword });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    // La contraseña nunca se guarda tal cual: se hashea igual que al crear.
+    const cambios = { ...updateUserDto } as any;
+    if (cambios.password) {
+      cambios.password = await bcrypt.hash(cambios.password, 10);
+    }
     const updated = await this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
+      .findByIdAndUpdate(id, cambios, { new: true })
       .select('-password');
     if (!updated) {
       throw new NotFoundException('Usuario no encontrado');

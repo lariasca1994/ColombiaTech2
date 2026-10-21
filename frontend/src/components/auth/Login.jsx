@@ -70,6 +70,9 @@ export default function Login() {
                 </div>
                 <button type="submit" className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3">Iniciar Sesion</button>
             </form>
+            <p className="mt-4 text-center text-sm">
+                <Link to="/recuperar" className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">¿Olvidaste tu contraseña?</Link>
+            </p>
             <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
                 ¿No tienes cuenta? <Link to="/create-user" className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">Crea una</Link>
             </p>

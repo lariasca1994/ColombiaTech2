@@ -38,7 +38,8 @@ Es una demo de portafolio:
 - Los inmuebles publicados son visibles para todas las personas con cuenta: publica datos de
   ejemplo, no tu dirección real.
 - El token se guarda en `localStorage`; cierra sesión con **Logout** en equipos compartidos.
-- No hay verificación de correo ni recuperación de contraseña por correo.
+- El registro no verifica el correo: para recuperar la cuenta con **¿Olvidaste tu contraseña?**,
+  regístrate con un correo al que tengas acceso.
 
 ## 2. Glosario
 
@@ -113,6 +114,15 @@ Desde el menú superior eliges **Crear Usuario** o **Login**. El botón 🌙 / �
 Si el correo o la contraseña no coinciden, el mensaje es el mismo («Credenciales inválidas»), para
 no revelar qué correos están registrados. La sesión se cierra sola tras **4 horas** sin actividad.
 
+#### ¿Olvidaste tu contraseña?
+
+1. En el inicio de sesión pulsa **¿Olvidaste tu contraseña?** y escribe el correo de tu cuenta.
+2. La respuesta es la misma exista o no la cuenta. Si existe, llega un correo con el enlace
+   **Crear contraseña nueva**: vence en 30 minutos y sirve una sola vez.
+3. Escribe la nueva contraseña (misma regla del registro) y su confirmación, y vuelve a ingresar.
+
+Se pueden pedir como máximo 3 enlaces cada 15 minutos por correo; pedirlos no bloquea el ingreso.
+
 ### 4.4 Ver casas
 
 ![Listado de inmuebles publicados](img/manual/04-casas.png)
@@ -166,10 +176,12 @@ Desde tu avatar (arriba a la derecha) → **Change Password**:
 
 | # | Campo | Qué escribir |
 |:-:|---|---|
-| 1 | Password | Tu contraseña actual |
-| 2 | New Password | La nueva contraseña |
-| 3 | Repeat New Password | La nueva contraseña otra vez |
-| 4 | Botón | Guarda el cambio |
+| 1 | Contraseña actual | Tu contraseña actual |
+| 2 | Nueva contraseña | Mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial; distinta de la actual |
+| 3 | Repite la nueva contraseña | La nueva contraseña otra vez |
+| 4 | Cambiar contraseña | Guarda el cambio |
+
+El servidor comprueba la contraseña actual y guarda solo la huella bcrypt de la nueva.
 
 En el mismo menú, **Profile** edita nombre, apellido, correo y avatar, y **Logout** cierra la
 sesión.

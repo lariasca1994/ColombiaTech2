@@ -181,6 +181,8 @@ La sesión se cierra sola tras 4 horas sin actividad.
 - Pulsa tu avatar (arriba a la derecha) para abrir el menú de cuenta:
   - **Profile:** edita nombre, apellido, correo y avatar.
   - **Change Password:** pide la contraseña actual y la nueva dos veces.
+- **¿Olvidaste tu contraseña?** (en el login): envía por correo (API de Brevo) un enlace que vence
+  en 30 minutos y sirve una sola vez.
   - **Logout:** cierra la sesión.
 - El botón 🌙 / ☀️ alterna entre tema oscuro y claro.
 

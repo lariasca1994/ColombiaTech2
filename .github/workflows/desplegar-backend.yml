@@ -28,6 +28,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
+      # El correo de recuperación de cuenta (API de Brevo) se configura desde
+      # los secretos del repositorio: nada se edita a mano en Render.
+      - name: Actualizar la configuración de correo en Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_REMITENTE: ${{ secrets.BREVO_REMITENTE }}
+        run: |
+          set -euo pipefail
+          for nombre in BREVO_API_KEY BREVO_REMITENTE; do
+            jq -n --arg v "${!nombre}" '{value: $v}' | curl -sSf -o /dev/null -X PUT \
+              "https://api.render.com/v1/services/${SERVICIO}/env-vars/${nombre}" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
+              --data-binary @- || { echo "::error::Render no aceptó la variable ${nombre}"; exit 1; }
+          done
+
       - name: Pedir a Render el despliegue de este commit
         id: deploy
         env:
