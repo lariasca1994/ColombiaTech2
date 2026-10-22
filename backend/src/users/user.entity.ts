@@ -26,4 +26,7 @@ export class User {
   // Intencionalmente NO tiene @Field(): el password nunca debe poder
   // pedirse desde una query de GraphQL, igual que se excluye en REST.
   password?: string;
+
+  // Tampoco se expone: estado de la verificación en dos pasos (ver auth/mfa.service.ts).
+  mfa?: Record<string, any>;
 }

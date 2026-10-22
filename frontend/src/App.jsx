@@ -11,6 +11,8 @@ import PrivateRoute from "./components/PrivateRoute";
 import ChangePassword from "./components/auth/ChangePassword";
 import Recuperar from "./components/auth/Recuperar";
 import Restablecer from "./components/auth/Restablecer";
+import Verificacion from "./components/auth/Verificacion";
+import Seguridad from "./components/auth/Seguridad";
 import HouseFormCreate from "./components/house/HouseFormCreate";
 import HouseFormEdit from "./components/house/HouseFormEdit";
 import Chat from "./components/chat/Chat";
@@ -23,7 +25,7 @@ function InactivityWatcher() {
 }
 
 // La portada de acceso ocupa toda la pantalla: sin cabecera ni pie.
-const RUTAS_PORTADA = ["/", "/login", "/recuperar", "/restablecer"];
+const RUTAS_PORTADA = ["/", "/login", "/recuperar", "/restablecer", "/verificacion"];
 
 /** Inicio: la portada de acceso es la primera pantalla, igual que en el
  *  resto del portafolio; con sesión iniciada se va directo a las casas. */
@@ -55,12 +57,14 @@ function Marco() {
         {/* Sección: cuenta */}
         <Route path="/user/:id" element={<PrivateRoute Component={UserFormEdit} />} />
         <Route path="/change-password" element={<PrivateRoute Component={ChangePassword} />} />
+        <Route path="/seguridad" element={<PrivateRoute Component={Seguridad} />} />
 
         {/* Rutas públicas */}
         <Route path="/create-user" element={<UserFormCreate />} />
         <Route path="/login" element={<Login />} />
         <Route path="/recuperar" element={<Recuperar />} />
         <Route path="/restablecer" element={<Restablecer />} />
+        <Route path="/verificacion" element={<Verificacion />} />
       </Routes>
       {!esPortada && <Footer />}
     </>

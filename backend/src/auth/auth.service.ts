@@ -1,9 +1,14 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { UsersService } from '../users/users.service';
 import { enviarCorreo } from './correo';
+import { Metodo, MfaService } from './mfa.service';
+
+// Pase de 10 minutos entre la contraseña y el código de la verificación en dos pasos.
+// Se firma con un secreto derivado: la estrategia de sesión nunca lo acepta.
+const secretoPase = () => `${process.env.JWT_SECRET}.mfa`;
 
 const RECUPERAR_MINUTOS = 30;
 const ENLACE_INVALIDO = 'El enlace no es válido o ya venció. Pide uno nuevo.';
@@ -31,6 +36,15 @@ function puedeEnviar(email: string): boolean {
 const escapar = (texto: string) =>
   texto.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
+export interface PasoMfa {
+  paso: 'mfa';
+  pase: string;
+  configurado: boolean;
+  metodo: Metodo | null;
+  activos: Metodo[];
+  email: string;
+}
+
 export interface AuthResult {
   token: string;
   user: {
@@ -48,9 +62,11 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly mfa: MfaService,
   ) {}
 
-  async login(email: string, password: string): Promise<AuthResult> {
+  // La contraseña sola no abre sesión: devuelve el pase para el segundo paso.
+  async login(email: string, password: string): Promise<PasoMfa> {
     const user = await this.usersService.findByEmailWithPassword(email);
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
@@ -65,24 +81,105 @@ export class AuthService {
       throw new UnauthorizedException('Esta cuenta fue suspendida');
     }
 
-    const payload = {
-      sub: user._id.toString(),
+    const conMfa = await this.mfa.cargar(user._id.toString());
+    const metodo = this.mfa.preferido(conMfa!);
+    if (metodo === 'correo') await this.mfa.enviarCodigo(conMfa!);
+    return {
+      paso: 'mfa',
+      pase: await this.jwtService.signAsync({ sub: user._id.toString(), tipo: 'mfa' }, { secret: secretoPase(), expiresIn: '10m' }),
+      configurado: this.mfa.configurado(conMfa!),
+      metodo,
+      activos: this.mfa.activos(conMfa!),
       email: user.email,
-      role: user.role,
     };
-    const token = await this.jwtService.signAsync(payload);
+  }
 
+  private async sesion(id: string): Promise<AuthResult> {
+    const user = await this.usersService.findOne(id);
+    const u = user as any;
+    const token = await this.jwtService.signAsync({ sub: id, email: u.email, role: u.role });
     return {
       token,
-      user: {
-        _id: user._id.toString(),
-        name: user.name,
-        lastname: user.lastname,
-        email: user.email,
-        avatar: user.avatar,
-        role: user.role,
-      },
+      user: { _id: id, name: u.name, lastname: u.lastname, email: u.email, avatar: u.avatar, role: u.role },
     };
+  }
+
+  private async usuarioDelPase(pase: string) {
+    let carga: { sub: string; tipo: string };
+    try {
+      carga = await this.jwtService.verifyAsync(pase || '', { secret: secretoPase() });
+    } catch {
+      throw new UnauthorizedException('El paso de verificación venció; vuelve a ingresar');
+    }
+    const u = carga.tipo === 'mfa' ? await this.mfa.cargar(carga.sub) : null;
+    if (!u || (u as any).active === false) throw new UnauthorizedException('El paso de verificación venció; vuelve a ingresar');
+    return u;
+  }
+
+  private async iniciarMetodo(u: any, metodo: Metodo) {
+    if (metodo === 'totp') return this.mfa.iniciarTotp(u);
+    if (!(await this.mfa.enviarCodigo(u))) {
+      throw new HttpException('Pediste varios códigos seguidos; espera unos minutos', 429);
+    }
+    return { enviado: true };
+  }
+
+  private async activarMetodo(u: any, metodo: Metodo, codigo: string) {
+    const ok = metodo === 'totp' ? await this.mfa.activarTotp(u, codigo) : await this.mfa.activarCorreo(u, codigo);
+    if (!ok) throw new BadRequestException('El código no es correcto o ya venció');
+  }
+
+  async mfaConfigurar(pase: string, metodo: Metodo) {
+    const u = await this.usuarioDelPase(pase);
+    if (this.mfa.configurado(u)) throw new ConflictException('La verificación en dos pasos ya está configurada');
+    return this.iniciarMetodo(u, metodo);
+  }
+
+  async mfaActivar(pase: string, metodo: Metodo, codigo: string): Promise<AuthResult> {
+    const u = await this.usuarioDelPase(pase);
+    if (this.mfa.configurado(u)) throw new ConflictException('La verificación en dos pasos ya está configurada');
+    await this.activarMetodo(u, metodo, codigo);
+    return this.sesion(u._id.toString());
+  }
+
+  async mfaReenviar(pase: string) {
+    const u = await this.usuarioDelPase(pase);
+    if (!this.mfa.activos(u).includes('correo')) throw new BadRequestException('El código por correo no está activo en tu cuenta');
+    if (!(await this.mfa.enviarCodigo(u))) {
+      throw new HttpException('Pediste varios códigos seguidos; espera unos minutos', 429);
+    }
+    return { detail: `Te enviamos un código a ${u.email}` };
+  }
+
+  async mfaVerificar(pase: string, metodo: Metodo, codigo: string): Promise<AuthResult> {
+    const u = await this.usuarioDelPase(pase);
+    if (!(await this.mfa.verificar(u, metodo, codigo))) {
+      throw new UnauthorizedException('El código no es correcto o ya venció');
+    }
+    return this.sesion(u._id.toString());
+  }
+
+  async mfaEstado(userId: string) {
+    const u = await this.mfa.cargar(userId);
+    return { activos: this.mfa.activos(u!), preferido: this.mfa.preferido(u!) };
+  }
+
+  async mfaAgregar(userId: string, metodo: Metodo) {
+    const u = await this.mfa.cargar(userId);
+    if (this.mfa.activos(u!).includes(metodo)) throw new ConflictException('Ese método ya está activo');
+    return this.iniciarMetodo(u, metodo);
+  }
+
+  async mfaAgregarActivar(userId: string, metodo: Metodo, codigo: string) {
+    const u = await this.mfa.cargar(userId);
+    await this.activarMetodo(u, metodo, codigo);
+    return { activos: this.mfa.activos(u!), preferido: this.mfa.preferido(u!) };
+  }
+
+  async mfaPreferido(userId: string, metodo: Metodo) {
+    const u = await this.mfa.cargar(userId);
+    if (!(await this.mfa.elegirPreferido(u!, metodo))) throw new BadRequestException('Ese método no está activo');
+    return { activos: this.mfa.activos(u!), preferido: this.mfa.preferido(u!) };
   }
 
   async recuperar(email: string): Promise<void> {

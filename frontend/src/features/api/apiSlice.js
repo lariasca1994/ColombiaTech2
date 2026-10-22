@@ -68,7 +68,16 @@ export const apiSlice = createApi({
         }),
         cambiarContrasena: builder.mutation({
             query: (body) => ({ url: 'auth/cambiar-contrasena', method: 'POST', body })
-        })
+        }),
+        // Verificación en dos pasos
+        mfaConfigurar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/configurar', method: 'POST', body }) }),
+        mfaActivar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/activar', method: 'POST', body }) }),
+        mfaVerificar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/verificar', method: 'POST', body }) }),
+        mfaCorreo: builder.mutation({ query: (body) => ({ url: 'auth/mfa/correo', method: 'POST', body }) }),
+        getMfa: builder.query({ query: () => 'auth/mfa' }),
+        mfaAgregar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/agregar', method: 'POST', body }) }),
+        mfaAgregarActivar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/agregar/activar', method: 'POST', body }) }),
+        mfaPreferido: builder.mutation({ query: (body) => ({ url: 'auth/mfa/preferido', method: 'POST', body }) })
     })
 })
 
@@ -82,5 +91,13 @@ export const { useGetUserByIdQuery,
     useLoginMutation,
     useRecuperarMutation,
     useRestablecerMutation,
-    useCambiarContrasenaMutation
+    useCambiarContrasenaMutation,
+    useMfaConfigurarMutation,
+    useMfaActivarMutation,
+    useMfaVerificarMutation,
+    useMfaCorreoMutation,
+    useGetMfaQuery,
+    useMfaAgregarMutation,
+    useMfaAgregarActivarMutation,
+    useMfaPreferidoMutation
 } = apiSlice

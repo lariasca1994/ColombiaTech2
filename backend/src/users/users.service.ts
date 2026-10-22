@@ -57,6 +57,18 @@ export class UsersService {
     }
   }
 
+  async findByIdWithMfa(id: string): Promise<(User & { _id: any }) | null> {
+    try {
+      return (await this.userModel.findById(id).select('+mfa')) as any;
+    } catch {
+      return null; // id con formato inválido
+    }
+  }
+
+  async setMfa(id: string, mfa: Record<string, any>): Promise<void> {
+    await this.userModel.findByIdAndUpdate(id, { mfa });
+  }
+
   async setPassword(id: string, password: string): Promise<void> {
     const hashedPassword = await bcrypt.hash(password, 10);
     await this.userModel.findByIdAndUpdate(id, { password: hashedPassword });

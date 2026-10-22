@@ -106,6 +106,12 @@ export default function Header() {
                   >
                     Change Password
                   </Link>
+                  <Link
+                    to="/seguridad"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Seguridad
+                  </Link>
                   <a
                     onClick={handleLogout}
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"

@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { useLoginMutation } from "../../features/api/apiSlice";
-import Swal from 'sweetalert2'
 import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { loginSuccess } from "../../features/authSlice";
 import Portada from "./Portada";
 
 // Los textos "Email", "Password", "Iniciar Sesion" y "Datos Invalidos" los
@@ -17,7 +14,6 @@ export default function Login() {
     const [login] = useLoginMutation();
     const [error, setError] = useState(false);
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -31,17 +27,9 @@ export default function Login() {
             if (response.error) {
                 setError(true)
             } else {
-                localStorage.setItem('sessionData', JSON.stringify(response.data))
-                dispatch(loginSuccess(response.data))
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: "Bienvenido",
-                    showConfirmButton: false,
-                    timer: 1500
-                }).then(() => {
-                    navigate('/house')
-                });
+                // La contraseña sola no abre sesión: falta la verificación en dos pasos.
+                sessionStorage.setItem('pasoMfa', JSON.stringify(response.data))
+                navigate('/verificacion')
             }
         } catch (error) {
             console.log(error)
