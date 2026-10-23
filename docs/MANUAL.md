@@ -109,10 +109,24 @@ Desde el menú superior eliges **Crear Usuario** o **Login**. El botón 🌙 / �
 |:-:|---|---|
 | 1 | Email | El correo de tu cuenta |
 | 2 | Password | Tu contraseña |
-| 3 | Iniciar Sesion | Entra y muestra los menús **🏠 Casas** y **💬 Chat** |
+| 3 | Iniciar Sesion | Pide el código de tu verificación en dos pasos; al escribirlo y pulsar **Verificar** entras y ves los menús **🏠 Casas** y **💬 Chat** |
 
 Si el correo o la contraseña no coinciden, el mensaje es el mismo («Credenciales inválidas»), para
 no revelar qué correos están registrados. La sesión se cierra sola tras **4 horas** sin actividad.
+
+#### Verificación en dos pasos (obligatoria)
+
+Cada ingreso pide, además de la contraseña, un código. La primera vez que ingresas eliges cómo
+recibirlo:
+
+| Método | Cómo funciona |
+|---|---|
+| **App autenticadora** (recomendado) | Escaneas un código QR con Google Authenticator, Microsoft Authenticator u otra app; desde ese momento la app muestra un código nuevo cada 30 segundos, incluso sin internet. Si no puedes escanear, escribe la clave que aparece bajo el QR. |
+| **Código por correo** | Cada vez que ingresas te llega un código de 6 dígitos que vence en 10 minutos y sirve una sola vez. |
+
+Confirma el método escribiendo el primer código. Desde tu avatar → **Seguridad** puedes **agregar el
+método que no elegiste** y escoger cuál se pide **por defecto**; tener los dos te permite entrar
+aunque no tengas el teléfono a mano.
 
 #### ¿Olvidaste tu contraseña?
 
@@ -212,6 +226,7 @@ Tu confianza es lo primero: la plataforma solo pide los datos necesarios para fu
 | Avatar | Foto de perfil | Cloudinary | Quien vea tu perfil |
 | Datos del inmueble y su foto | Publicar el aviso | MongoDB Atlas y Cloudinary | Todas las personas con sesión |
 | Mensajes del chat | Conversar | MongoDB Atlas | Todas las personas en el chat |
+| Verificación en dos pasos | Confirmar que eres tú al ingresar | MongoDB Atlas: clave de la app **cifrada** (AES-256-GCM) y código del correo **solo como huella**; nunca sale en las respuestas de la API | Nadie: no se puede leer desde la base |
 | Sesión (token) | Mantenerte conectado | `localStorage` de tu navegador | Solo tu navegador; vence a las 4 horas |
 
 ### Cómo se protege tu información
@@ -220,6 +235,9 @@ Comprobado en el código del proyecto (`backend/src/auth`, `users`, `houses`, `u
 
 - **Contraseñas con bcrypt** (factor 10). Las respuestas de la API nunca incluyen la contraseña ni su
   huella.
+- **Verificación en dos pasos obligatoria** con app autenticadora (TOTP) o código por correo:
+  la clave de la app se guarda cifrada, un código no se acepta dos veces, 5 códigos errados de la
+  app la bloquean 15 minutos, y el código del correo vence en 10 minutos y admite 5 intentos.
 - **Política de contraseña robusta** en el registro: 8 caracteres o más, con mayúscula, minúscula,
   número y carácter especial.
 - **Sesión con JWT que vence a las 4 horas**, más cierre automático por 4 horas de inactividad.

@@ -55,7 +55,8 @@ sobre la misma base de código, con frontend en React.
 
 ### Funcionalidades
 
-- Registro e inicio de sesión con JSON Web Tokens
+- Registro e inicio de sesión con JSON Web Tokens y verificación en dos pasos obligatoria (app
+  autenticadora o código por correo, a elección; el otro se agrega desde **Seguridad**)
 - Publicación y consulta de inmuebles
 - Carga de imágenes (avatares y fotos de inmuebles) con almacenamiento
   persistente en la nube
@@ -139,7 +140,10 @@ negocio entre capas.
 
 1. Elige **Login** en la esquina superior derecha.
 2. Ingresa **Email** y **Password** y pulsa **Iniciar Sesion**.
-3. Al entrar, el menú cambia y muestra las secciones **🏠 Casas** y **💬 Chat**.
+3. Escribe el código de 6 dígitos de tu app o de tu correo y pulsa **Verificar**. La primera vez
+   eliges el método (**App autenticadora** o **Código por correo**); en tu avatar → **Seguridad**
+   puedes agregar el otro y elegir cuál se pide por defecto.
+4. Al entrar, el menú cambia y muestra las secciones **🏠 Casas** y **💬 Chat**.
 
 La sesión se cierra sola tras 4 horas sin actividad.
 
