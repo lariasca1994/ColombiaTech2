@@ -254,6 +254,8 @@ Comprobado en el código del proyecto (`backend/src/auth`, `users`, `houses`, `u
 - **Runtime con parches de seguridad:** la API corre con Node.js 24.22.1, que corrige la ejecución
   remota de código en la descompresión Brotli (CVE-2026-111497) y las omisiones de la verificación
   del nombre en TLS, y deja de confiar en los certificados intermedios comprometidos de eMudhra.
+  Las dependencias se auditan (npm audit, pip-audit o dotnet list package --vulnerable) y quedaron
+  sin vulnerabilidades conocidas altas ni críticas.
 
 ## 6. Agradecimientos
 
