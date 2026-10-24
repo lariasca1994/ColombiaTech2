@@ -251,6 +251,8 @@ Comprobado en el código del proyecto (`backend/src/auth`, `users`, `houses`, `u
 - **CORS restringido:** la API solo acepta llamadas desde la web oficial.
 - **Secretos fuera del repositorio:** la conexión a MongoDB, la clave JWT y las credenciales de
   Cloudinary viven en variables de entorno de Render.
+- **Al día en seguridad:** el runtime, el sistema y las dependencias se mantienen con los últimos
+  parches y se revisan periódicamente.
 
 ## 6. Agradecimientos
 

@@ -204,7 +204,7 @@ Si la API o la base de datos (MongoDB Atlas) no responden, la aplicación muestr
 
 ### Requisitos
 
-- Node.js 18 o superior
+- Node.js 24.22.1 o superior de la serie 24 (parches de seguridad de octubre de 2026)
 - npm
 - Una instancia de MongoDB accesible
 - Una cuenta de Cloudinary para la carga de imágenes
