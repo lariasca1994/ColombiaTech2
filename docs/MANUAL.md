@@ -251,6 +251,9 @@ Comprobado en el código del proyecto (`backend/src/auth`, `users`, `houses`, `u
 - **CORS restringido:** la API solo acepta llamadas desde la web oficial.
 - **Secretos fuera del repositorio:** la conexión a MongoDB, la clave JWT y las credenciales de
   Cloudinary viven en variables de entorno de Render.
+- **Runtime con parches de seguridad:** la API corre con Node.js 24.22.1, que corrige la ejecución
+  remota de código en la descompresión Brotli (CVE-2026-111497) y las omisiones de la verificación
+  del nombre en TLS, y deja de confiar en los certificados intermedios comprometidos de eMudhra.
 
 ## 6. Agradecimientos
 
