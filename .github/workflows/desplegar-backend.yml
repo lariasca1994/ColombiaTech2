@@ -35,9 +35,11 @@ jobs:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           BREVO_REMITENTE: ${{ secrets.BREVO_REMITENTE }}
+          # Node con los parches de octubre de 2026 (Brotli RCE, TLS, CA de eMudhra).
+          NODE_VERSION: "24.22.1"
         run: |
           set -euo pipefail
-          for nombre in BREVO_API_KEY BREVO_REMITENTE; do
+          for nombre in BREVO_API_KEY BREVO_REMITENTE NODE_VERSION; do
             jq -n --arg v "${!nombre}" '{value: $v}' | curl -sSf -o /dev/null -X PUT \
               "https://api.render.com/v1/services/${SERVICIO}/env-vars/${nombre}" \
               -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \

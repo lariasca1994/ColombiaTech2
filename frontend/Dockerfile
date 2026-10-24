@@ -1,4 +1,4 @@
-FROM node:lts-bullseye as build
+FROM node:24.22.1-bookworm AS build
 WORKDIR /app
 COPY package*.json ./ 
 RUN npm install
