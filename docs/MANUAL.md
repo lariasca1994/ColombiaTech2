@@ -195,7 +195,7 @@ Desde tu avatar (arriba a la derecha) → **Change Password**:
 | 3 | Repite la nueva contraseña | La nueva contraseña otra vez |
 | 4 | Cambiar contraseña | Guarda el cambio |
 
-El servidor comprueba la contraseña actual y guarda solo la huella bcrypt de la nueva.
+El servidor comprueba la contraseña actual y guarda solo la huella de la nueva.
 
 En el mismo menú, **Profile** edita nombre, apellido, correo y avatar, y **Logout** cierra la
 sesión.
@@ -222,12 +222,12 @@ Tu confianza es lo primero: la plataforma solo pide los datos necesarios para fu
 | Dato | Para qué se usa | Dónde se guarda | Quién lo ve |
 |---|---|---|---|
 | Nombre, apellido y correo | Identificar tu cuenta | MongoDB Atlas | Tú y el administrador |
-| Contraseña | Iniciar sesión | MongoDB Atlas, **solo su huella bcrypt** | Nadie: no se puede leer ni recuperar |
+| Contraseña | Iniciar sesión | MongoDB Atlas, **solo su huella** | Nadie: no se puede leer ni recuperar |
 | Avatar | Foto de perfil | Cloudinary | Quien vea tu perfil |
 | Datos del inmueble y su foto | Publicar el aviso | MongoDB Atlas y Cloudinary | Todas las personas con sesión |
 | Mensajes del chat | Conversar | MongoDB Atlas | Todas las personas en el chat |
 | Verificación en dos pasos | Confirmar que eres tú al ingresar | MongoDB Atlas: clave de la app **cifrada** y código del correo **solo como huella**; nunca sale en las respuestas de la API | Nadie: no se puede leer desde la base |
-| Sesión (token) | Mantenerte conectado | `localStorage` de tu navegador | Solo tu navegador; vence a las 4 horas |
+| Sesión (token) | Mantenerte conectado | `localStorage` de tu navegador | Solo tu navegador; vence sola |
 
 ### Cómo se protege tu información
 
@@ -236,11 +236,11 @@ Comprobado en el código del proyecto (`backend/src/auth`, `users`, `houses`, `u
 - **Contraseñas protegidas con hash.** Las respuestas de la API nunca incluyen la contraseña ni su
   huella.
 - **Verificación en dos pasos obligatoria** con app autenticadora (TOTP) o código por correo:
-  la clave de la app se guarda cifrada, un código no se acepta dos veces, 5 códigos errados de la
-  app la bloquean 15 minutos, y el código del correo vence en 10 minutos y admite 5 intentos.
+  la clave de la app se guarda cifrada, un código no se acepta dos veces, los intentos errados
+  bloquean temporalmente y el código del correo vence en pocos minutos.
 - **Política de contraseña robusta** en el registro: 8 caracteres o más, con mayúscula, minúscula,
   número y carácter especial.
-- **Sesión con JWT que vence a las 4 horas**, más cierre automático por 4 horas de inactividad.
+- **Sesión que vence sola**, con cierre automático por inactividad.
 - **Cada quien solo alcanza lo suyo:** solo el dueño (o un administrador) puede editar o borrar un
   inmueble, ver o modificar una cuenta o cambiar un avatar; el resto recibe un error 403. Esto se
   aplica igual por REST y por GraphQL.

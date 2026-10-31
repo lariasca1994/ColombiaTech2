@@ -8,7 +8,7 @@ cero, según lo acordado, en vez de parchar el código viejo.
 
 | Problema encontrado | Dónde | Corrección |
 |---|---|---|
-| Login devolvía el usuario completo, **incluyendo el hash bcrypt del password** | `Nest/src/auth/auth.service.ts` | `AuthService.login` ahora emite un JWT y un objeto de usuario explícitamente sin password |
+| Login devolvía el usuario completo, **incluyendo datos internos de la cuenta** | `Nest/src/auth/auth.service.ts` | `AuthService.login` ahora emite un JWT y un objeto de usuario explícitamente sin password |
 | Ningún controlador tenía `@UseGuards` — la API entera estaba abierta | `houses`, `users`, `messages` controllers | `JwtAuthGuard` aplicado con criterio: lectura pública en houses, todo lo demás protegido |
 | `HousesService.update` tenía un `catch` sin `try`, y `delete` quedó anidado dentro de `update` por error — **no compilaba** | `Nest/src/houses/houses.service.ts` | Reescrito, cada método separado y correcto |
 | `MessagesService` era solo el scaffold vacío de `nest generate` (`'This action adds a new message'`) | `Nest/src/messages/messages.service.ts` | Implementación real, basada en el patrón bueno que sí tenía `Tech/routes/MessageRoutes.js` (incluyendo excluir el password al popular `from`/`to`) |

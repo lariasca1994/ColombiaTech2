@@ -12,8 +12,8 @@ el proceso en una entrevista técnica.
   `.gitignore` del frontend — **causa raíz real**: el `.gitignore` que
   genera Vite por defecto solo ignora `*.local`, no `.env` — por eso pudo
   comitearse la primera vez.
-- El login devolvía el usuario completo, incluyendo el hash bcrypt del
-  password, al cliente. Corregido: el password ahora tiene `select: false`
+- El login devolvía el usuario completo, incluyendo datos internos de la
+  cuenta, al cliente. Corregido: el password ahora tiene `select: false`
   a nivel de esquema Mongoose, y el login solo devuelve un JWT + datos
   públicos.
 - Ningún controlador (`houses`, `users`, `messages`) tenía `@UseGuards` —
