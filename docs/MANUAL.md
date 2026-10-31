@@ -226,14 +226,14 @@ Tu confianza es lo primero: la plataforma solo pide los datos necesarios para fu
 | Avatar | Foto de perfil | Cloudinary | Quien vea tu perfil |
 | Datos del inmueble y su foto | Publicar el aviso | MongoDB Atlas y Cloudinary | Todas las personas con sesión |
 | Mensajes del chat | Conversar | MongoDB Atlas | Todas las personas en el chat |
-| Verificación en dos pasos | Confirmar que eres tú al ingresar | MongoDB Atlas: clave de la app **cifrada** (AES-256-GCM) y código del correo **solo como huella**; nunca sale en las respuestas de la API | Nadie: no se puede leer desde la base |
+| Verificación en dos pasos | Confirmar que eres tú al ingresar | MongoDB Atlas: clave de la app **cifrada** y código del correo **solo como huella**; nunca sale en las respuestas de la API | Nadie: no se puede leer desde la base |
 | Sesión (token) | Mantenerte conectado | `localStorage` de tu navegador | Solo tu navegador; vence a las 4 horas |
 
 ### Cómo se protege tu información
 
 Comprobado en el código del proyecto (`backend/src/auth`, `users`, `houses`, `upload`):
 
-- **Contraseñas con bcrypt** (factor 10). Las respuestas de la API nunca incluyen la contraseña ni su
+- **Contraseñas protegidas con hash.** Las respuestas de la API nunca incluyen la contraseña ni su
   huella.
 - **Verificación en dos pasos obligatoria** con app autenticadora (TOTP) o código por correo:
   la clave de la app se guarda cifrada, un código no se acepta dos veces, 5 códigos errados de la
