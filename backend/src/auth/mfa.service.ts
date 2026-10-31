@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { createCipheriv, createDecipheriv, createHmac, hkdfSync, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import * as QRCode from 'qrcode';
 import { UsersService } from '../users/users.service';
+import { AuditoriaService, EVENTOS } from './auditoria.service';
 import { enviarCorreo } from './correo';
 
 // Verificación en dos pasos (obligatoria). Cada cuenta usa al menos uno de dos métodos:
@@ -18,6 +19,9 @@ const CODIGO_MIN = 10;
 const MAX_INTENTOS = 5;
 const MAX_ENVIOS = 3;
 const BLOQUEO_SEG = 15 * 60;
+const MAX_FALLOS_CLAVE = 5;
+const BLOQUEO_CLAVE_SEG = 15 * 60;
+export const MENSAJE_BLOQUEO = 'Demasiados intentos fallidos. Espera unos minutos e inténtalo de nuevo.';
 const ALFABETO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
 type Usuario = { _id: any; email: string; name: string; mfa?: Record<string, any> };
@@ -28,7 +32,10 @@ export class MfaService {
     hkdfSync('sha256', process.env.JWT_SECRET as string, Buffer.alloc(0), 'ColombiaTech.MFA.v1', 32),
   );
 
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly auditoria: AuditoriaService,
+  ) {}
 
   // ─── utilidades ───
   private cifrar(texto: string): string {
@@ -196,5 +203,36 @@ export class MfaService {
     if (!this.activos(u).includes(metodo)) return false;
     await this.guardar(u, { preferido: metodo });
     return true;
+  }
+
+  // ─── auditoría y bloqueo por contraseña errada ───
+  registrar(tipo: string, u: Usuario): Promise<void> {
+    return this.auditoria.registrar(tipo, u._id.toString());
+  }
+
+  claveBloqueada(u: Usuario): boolean {
+    return (this.estado(u).bloqueo_clave_hasta || 0) > Date.now() / 1000;
+  }
+
+  // Suma una contraseña errada; la quinta seguida bloquea la cuenta un tiempo.
+  async falloDeClave(u: Usuario): Promise<void> {
+    await this.registrar(EVENTOS.claveErrada, u);
+    const fallos = (this.estado(u).fallos_clave || 0) + 1;
+    if (fallos >= MAX_FALLOS_CLAVE) {
+      await this.guardar(u, { fallos_clave: 0, bloqueo_clave_hasta: Date.now() / 1000 + BLOQUEO_CLAVE_SEG });
+      await this.registrar(EVENTOS.cuentaBloqueada, u);
+    } else {
+      await this.guardar(u, { fallos_clave: fallos });
+    }
+  }
+
+  async claveCorrecta(u: Usuario): Promise<void> {
+    if (this.estado(u).fallos_clave) await this.guardar(u, { fallos_clave: 0 });
+  }
+
+  // Contraseña nueva (recuperación o cambio): se levanta el bloqueo y queda en la auditoría.
+  async claveRestablecida(u: Usuario): Promise<void> {
+    await this.guardar(u, { fallos_clave: 0, bloqueo_clave_hasta: 0 });
+    await this.registrar(EVENTOS.claveCambiada, u);
   }
 }

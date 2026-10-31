@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
+import { AuditoriaService } from './auditoria.service';
 import { MfaService } from './mfa.service';
 import { UsersModule } from '../users/users.module';
 
@@ -23,7 +24,7 @@ if (!process.env.JWT_SECRET) {
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, MfaService],
+  providers: [AuthService, JwtStrategy, MfaService, AuditoriaService],
   exports: [JwtModule],
 })
 export class AuthModule {}

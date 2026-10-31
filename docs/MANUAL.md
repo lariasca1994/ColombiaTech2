@@ -251,6 +251,9 @@ Comprobado en el código del proyecto (`backend/src/auth`, `users`, `houses`, `u
 - **CORS restringido:** la API solo acepta llamadas desde la web oficial.
 - **Secretos fuera del repositorio:** la conexión a MongoDB, la clave JWT y las credenciales de
   Cloudinary viven en variables de entorno de Render.
+- **Bloqueo temporal** ante intentos fallidos repetidos de contraseña o de código.
+- **Registro de eventos de seguridad:** ingresos, intentos fallidos, bloqueos y cambios de
+  contraseña quedan registrados (nunca contraseñas ni códigos) y se depuran solos.
 - **Al día en seguridad:** el runtime, el sistema y las dependencias se mantienen con los últimos
   parches y se revisan periódicamente.
 

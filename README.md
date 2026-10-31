@@ -57,6 +57,8 @@ sobre la misma base de código, con frontend en React.
 
 - Registro e inicio de sesión con JSON Web Tokens y verificación en dos pasos obligatoria (app
   autenticadora o código por correo, a elección; el otro se agrega desde **Seguridad**)
+- Bloqueo temporal ante intentos fallidos repetidos y registro de eventos de seguridad (ingresos,
+  intentos fallidos, bloqueos y cambios de contraseña)
 - Publicación y consulta de inmuebles
 - Carga de imágenes (avatares y fotos de inmuebles) con almacenamiento
   persistente en la nube

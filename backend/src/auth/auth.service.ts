@@ -4,7 +4,8 @@ import * as bcrypt from 'bcryptjs';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { UsersService } from '../users/users.service';
 import { enviarCorreo } from './correo';
-import { Metodo, MfaService } from './mfa.service';
+import { EVENTOS } from './auditoria.service';
+import { MENSAJE_BLOQUEO, Metodo, MfaService } from './mfa.service';
 
 // Pase de 10 minutos entre la contraseña y el código de la verificación en dos pasos.
 // Se firma con un secreto derivado: la estrategia de sesión nunca lo acepta.
@@ -72,16 +73,22 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    const conMfa = await this.mfa.cargar(user._id.toString());
+    if (this.mfa.claveBloqueada(conMfa!)) {
+      throw new HttpException(MENSAJE_BLOQUEO, 429);
+    }
+
     const passwordMatches = await bcrypt.compare(password, user.password);
     if (!passwordMatches) {
+      await this.mfa.falloDeClave(conMfa!);
       throw new UnauthorizedException('Credenciales inválidas');
     }
+    await this.mfa.claveCorrecta(conMfa!);
 
     if (user.active === false) {
       throw new UnauthorizedException('Esta cuenta fue suspendida');
     }
 
-    const conMfa = await this.mfa.cargar(user._id.toString());
     const metodo = this.mfa.preferido(conMfa!);
     if (metodo === 'correo') await this.mfa.enviarCodigo(conMfa!);
     return {
@@ -127,6 +134,7 @@ export class AuthService {
   private async activarMetodo(u: any, metodo: Metodo, codigo: string) {
     const ok = metodo === 'totp' ? await this.mfa.activarTotp(u, codigo) : await this.mfa.activarCorreo(u, codigo);
     if (!ok) throw new BadRequestException('El código no es correcto o ya venció');
+    await this.mfa.registrar(EVENTOS.metodoActivado, u);
   }
 
   async mfaConfigurar(pase: string, metodo: Metodo) {
@@ -154,8 +162,10 @@ export class AuthService {
   async mfaVerificar(pase: string, metodo: Metodo, codigo: string): Promise<AuthResult> {
     const u = await this.usuarioDelPase(pase);
     if (!(await this.mfa.verificar(u, metodo, codigo))) {
+      await this.mfa.registrar(EVENTOS.codigoErrado, u);
       throw new UnauthorizedException('El código no es correcto o ya venció');
     }
+    await this.mfa.registrar(EVENTOS.ingreso, u);
     return this.sesion(u._id.toString());
   }
 
@@ -194,6 +204,7 @@ export class AuthService {
     // El token va después de "#": el navegador no lo envía a ningún servidor.
     const origen = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, '');
     const enlace = `${origen}/restablecer#${token}`;
+    await this.mfa.registrar(EVENTOS.recuperacion, user as any);
     await enviarCorreo(
       user.email,
       user.name,
@@ -221,6 +232,7 @@ export class AuthService {
       throw new BadRequestException(ENLACE_INVALIDO);
     }
     await this.usersService.setPassword(carga.sub, password);
+    await this.claveRestablecida(carga.sub);
   }
 
   async cambiarContrasena(userId: string, actual: string, nueva: string): Promise<void> {
@@ -232,5 +244,11 @@ export class AuthService {
       throw new BadRequestException('La contraseña nueva debe ser distinta de la actual');
     }
     await this.usersService.setPassword(userId, nueva);
+    await this.claveRestablecida(userId);
+  }
+
+  private async claveRestablecida(id: string): Promise<void> {
+    const u = await this.mfa.cargar(id);
+    if (u) await this.mfa.claveRestablecida(u);
   }
 }
