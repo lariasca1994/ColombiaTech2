@@ -63,9 +63,8 @@ revisión inicial de código — documentado aquí porque es la causa de que
 "crear usuario" fallara con un error de CORS:
 
 - **Los tres `apiSlice` de RTK Query (`apiSlice.js`, `apiHousesSlice.js`,
-  `apiMessageSlice.js`) apuntaban con `baseUrl` hardcodeado a
-  `https://nodejs-chi-seven.vercel.app/`** — el backend de demostración
-  del instructor del bootcamp. El frontend original **nunca estuvo
+  `apiMessageSlice.js`) apuntaban con `baseUrl` hardcodeado al backend
+  de demostración del instructor del bootcamp**. El frontend original **nunca estuvo
   conectado a `Nest` ni a `Tech`** para las llamadas REST de
   usuarios/casas/mensajes. Corregido: ahora usan `VITE_API_URL`.
 - Rutas que no coincidían con el backend nuevo: `/user` → `/users`,
