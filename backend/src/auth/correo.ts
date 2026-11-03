@@ -4,6 +4,45 @@ import { Logger } from '@nestjs/common';
 // Sin BREVO_API_KEY (desarrollo) no envía nada: escribe el aviso en el log.
 const logger = new Logger('Correo');
 
+// Colores del sitio (Tailwind: barra gray-800, acento emerald-600, fondo
+// emerald-50 de la portada): el correo se ve como la aplicación.
+const C = {
+  fondo: '#F7FDFA',
+  superficie: '#FFFFFF',
+  borde: '#E5E7EB',
+  texto: '#111827',
+  suave: '#4B5563',
+  acento: '#059669',
+  cabecera: '#1F2937',
+  cabeceraTexto: '#FFFFFF',
+};
+const FUENTE = "Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif";
+
+const escaparHtml = (texto: string) =>
+  texto.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+
+/** Envuelve el contenido del correo con la cabecera, el logo y los colores del sitio. */
+export function documento(asunto: string, contenido: string): string {
+  const sitio = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, '');
+  return (
+    '<!doctype html><html lang="es"><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    `<title>${escaparHtml(asunto)}</title></head>` +
+    `<body style="margin:0;padding:0;background:${C.fondo};">` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.fondo};padding:24px 12px;"><tr><td align="center">` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:${C.superficie};` +
+    `border:1px solid ${C.borde};border-radius:12px;overflow:hidden;font-family:${FUENTE};color:${C.texto};">` +
+    `<tr><td style="background:${C.cabecera};border-top:4px solid ${C.acento};padding:16px 28px;">` +
+    `<img src="${sitio}/apple-touch-icon.png" width="28" height="28" alt="" ` +
+    'style="vertical-align:middle;border:0;border-radius:6px;margin-right:10px;">' +
+    `<span style="vertical-align:middle;font-size:17px;font-weight:700;color:${C.cabeceraTexto};">ColombiaTech</span></td></tr>` +
+    `<tr><td style="padding:24px 28px 12px;font-size:15px;line-height:1.6;color:${C.texto};">${contenido}</td></tr>` +
+    `<tr><td style="padding:16px 28px 22px;border-top:1px solid ${C.borde};font-size:12px;line-height:1.5;color:${C.suave};">` +
+    'Correo automático de ColombiaTech. Si no esperabas este mensaje, puedes ignorarlo.</td></tr>' +
+    '</table></td></tr></table></body></html>'
+  );
+}
+
 export async function enviarCorreo(
   destino: string,
   nombre: string,
@@ -26,7 +65,7 @@ export async function enviarCorreo(
         to: [{ email: destino, name: nombre }],
         subject: asunto,
         textContent: texto,
-        htmlContent: html,
+        htmlContent: documento(asunto, html),
       }),
       signal: AbortSignal.timeout(20000),
     });
