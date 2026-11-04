@@ -59,7 +59,15 @@ jobs:
           respuesta=$(curl -sS -X POST "https://api.render.com/v1/services/${SERVICIO}/deploys" \
             -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
             -d "{\"commitId\":\"${GITHUB_SHA}\",\"clearCache\":\"do_not_clear\"}")
-          id=$(echo "$respuesta" | jq -r '.id // empty')
+          id=$(echo "$respuesta" | jq -r '.id // empty' 2>/dev/null || true)
+          if [ -z "$id" ]; then
+            # Con un despliegue ya en curso, Render encola el nuevo y responde 202 sin cuerpo:
+            # se toma el despliegue de este commit de la lista reciente.
+            sleep 5
+            id=$(curl -sS "https://api.render.com/v1/services/${SERVICIO}/deploys?limit=10" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" \
+              | jq -r --arg sha "$GITHUB_SHA" '[.[].deploy | select(.commit.id == $sha)][0].id // empty')
+          fi
           if [ -z "$id" ]; then
             echo "::error::Render no aceptó el despliegue: $respuesta"
             exit 1
