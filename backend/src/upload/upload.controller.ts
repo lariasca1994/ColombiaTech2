@@ -10,17 +10,11 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import { cloudinary } from '../imagenes/cloudinary';
 import { UsersService } from '../users/users.service';
 import { HousesService } from '../houses/houses.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 const imageStorage = new CloudinaryStorage({
   cloudinary,

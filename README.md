@@ -86,6 +86,7 @@ ColombiaTech2/
 │       ├── users/
 │       ├── houses/
 │       ├── upload/   Carga de imágenes a Cloudinary
+│       ├── imagenes/ Configuración compartida de Cloudinary
 │       └── messages/ Gateway del chat
 └── frontend/         React + Vite + Redux Toolkit + Tailwind
     └── src/
@@ -115,7 +116,7 @@ negocio entre capas.
 | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) | Sirve la aplicación React (Vite + Redux Toolkit + Tailwind) y el cliente de chat. |
 | ![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=black) | Corre el backend NestJS: las rutas REST (`/api`), GraphQL (`/graphql`) y el gateway de chat (Socket.IO) llegan a los mismos módulos de dominio, protegidos con JWT. Admite conexiones WebSocket persistentes. |
 | ![MongoDB Atlas](https://img.shields.io/badge/MongoDB_Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white) | Guarda usuarios, inmuebles y mensajes. |
-| ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white) | Almacena las imágenes: avatares de usuario y fotos de inmuebles. |
+| ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white) | Almacena las imágenes: avatares de usuario, fotos de inmuebles y las ilustraciones que la plataforma genera para cada inmueble sin foto. |
 | ![API Colombia](https://img.shields.io/badge/API_Colombia-FCD116?style=for-the-badge&logoColor=black) | Catálogo público de departamentos y ciudades para los selectores del formulario de inmuebles (sin registro ni clave). |
 
 ---
@@ -165,7 +166,7 @@ La sesión se cierra sola tras 4 horas sin actividad.
    | Parking | Sí o No |
    | Price | Precio |
    | Code | Código que identifica el inmueble |
-   | Imagen | Foto del inmueble (PNG o JPG) |
+   | Imagen | Foto del inmueble (PNG o JPG). Opcional: si no subes una, la plataforma genera una ilustración del inmueble |
 
 3. Pulsa **Save**.
 
@@ -257,6 +258,14 @@ Los dos se despliegan desde GitHub con cada push a `main`:
   comprueba `/health`. Se hace así porque Render no recibe los avisos de push de
   este repo. Necesita el secreto de repositorio `RENDER_API_KEY`; también se puede
   lanzar a mano desde la pestaña Actions.
+
+### Imágenes automáticas y depuración
+
+- Cada inmueble sin foto recibe una ilustración generada en el backend (`houses/imagen-casa.ts`):
+  cambia según el tipo, los datos y el código del inmueble, se sube a Cloudinary y se rehace al
+  editarlo. Al arrancar, el backend completa las imágenes de los inmuebles que no tienen.
+- Los inmuebles que crean las pruebas automáticas (código `QA-…`) se borran a los 15 días junto con
+  su imagen, y al eliminar cualquier inmueble se borra su imagen de Cloudinary: nada queda huérfano.
 
 ---
 

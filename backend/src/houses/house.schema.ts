@@ -13,6 +13,8 @@ export const HouseSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   code: { type: String, required: true, unique: true },
   image: { type: String },
+  // true si la imagen la generó la plataforma (se rehace al editar la casa); false si la subió el usuario
+  imageAuto: { type: Boolean, default: false },
   // Dueño de la publicación (id de User). Antes no existía ningún concepto
   // de ownership acá -- cualquier usuario logueado podía editar/borrar la
   // casa de cualquier otro. Ahora solo el dueño o un admin pueden hacerlo

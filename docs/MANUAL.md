@@ -167,9 +167,14 @@ persona, el servidor lo rechaza.
 | 9 | Parking | Sí o No |
 | 10 | Price | Precio en pesos, sin puntos |
 | 11 | Code | Código que identifica el inmueble (lo usas para buscarlo y editarlo) |
-| 12 | Imagen | Foto del inmueble: PNG o JPG, máximo 5 MB |
+| 12 | Imagen | Foto del inmueble: PNG o JPG, máximo 5 MB (opcional) |
 
 Pulsa **Save** para publicarlo. Todos los campos de texto y número son obligatorios.
+
+**Imagen automática:** si no subes una foto, la plataforma crea una ilustración del inmueble con
+su tipo (casa, apartamento, finca o local), ciudad, habitaciones, baños, área, parqueadero, precio
+y código. Si luego editas los datos, la ilustración se actualiza; si subes una foto, la reemplaza.
+Al eliminar el inmueble, su imagen se borra también.
 
 ### 4.6 Chat
 
@@ -224,7 +229,7 @@ Tu confianza es lo primero: la plataforma solo pide los datos necesarios para fu
 | Nombre, apellido y correo | Identificar tu cuenta | MongoDB Atlas | Tú y el administrador |
 | Contraseña | Iniciar sesión | MongoDB Atlas, **solo su huella** | Nadie: no se puede leer ni recuperar |
 | Avatar | Foto de perfil | Cloudinary | Quien vea tu perfil |
-| Datos del inmueble y su foto | Publicar el aviso | MongoDB Atlas y Cloudinary | Todas las personas con sesión |
+| Datos del inmueble y su foto (o la ilustración generada) | Publicar el aviso | MongoDB Atlas y Cloudinary | Todas las personas con sesión |
 | Mensajes del chat | Conversar | MongoDB Atlas | Todas las personas en el chat |
 | Verificación en dos pasos | Confirmar que eres tú al ingresar | MongoDB Atlas: clave de la app **cifrada** y código del correo **solo como huella**; nunca sale en las respuestas de la API | Nadie: no se puede leer desde la base |
 | Sesión (token) | Mantenerte conectado | `localStorage` de tu navegador | Solo tu navegador; vence sola |
