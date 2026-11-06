@@ -14,7 +14,7 @@ export default function Mantenimiento() {
 
     useEffect(() => {
         if (!activo) return undefined
-        document.title = 'En mantenimiento · ColombiaTech'
+        document.title = 'En mantenimiento · Alquiler de vivienda'
         const intervalo = setInterval(async () => {
             try {
                 const respuesta = await fetch(`${API_URL}/health`, { cache: 'no-store' })
@@ -40,7 +40,7 @@ export default function Mantenimiento() {
                     <span className="w-3 h-full rounded bg-emerald-600 dark:bg-emerald-400 motion-safe:animate-pulse [animation-delay:200ms]" />
                     <span className="w-3 h-[70%] rounded bg-emerald-600 dark:bg-emerald-400 motion-safe:animate-pulse [animation-delay:400ms]" />
                 </div>
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400 mb-2">ColombiaTech</p>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400 mb-2">Alquiler de vivienda</p>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">Estamos en mantenimiento</h1>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                     El servicio no está respondiendo en este momento, así que no se pueden consultar casas, publicar ni chatear.

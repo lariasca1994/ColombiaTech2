@@ -18,7 +18,7 @@ export default function Portada({ paso, titulo, subtitulo, children }) {
       <aside className="portada-marca relative overflow-hidden flex flex-col gap-6 lg:justify-between px-5 sm:px-10 lg:px-16 pt-6 pb-14 lg:py-10 bg-emerald-50 dark:bg-[#06140f] text-emerald-950 dark:text-emerald-50">
         <Link to="/" className="relative inline-flex items-center gap-2.5 font-bold text-lg">
           <img src="/icono.svg" alt="" className="w-8 h-8" />
-          ColombiaTech
+          Alquiler de vivienda
         </Link>
 
         <div className="relative max-w-xl">
