@@ -86,7 +86,9 @@ Qué servicio de nube, base de datos o API usa el proyecto y para qué sirve cad
 
 ![Portada de Alquiler de vivienda](img/manual/01-portada.png)
 
-Desde el menú superior eliges **Crear Usuario** o **Login**. El botón 🌙 / ☀️ cambia el tema.
+La portada de **Alquiler de vivienda** muestra el inicio de sesión. Si aún no tienes cuenta,
+pulsa **Crea una**; si olvidaste la contraseña, **¿Olvidaste tu contraseña?**. El botón 🌙 / ☀️
+cambia el tema.
 
 ### 4.2 Crear una cuenta
 
@@ -110,6 +112,7 @@ Desde el menú superior eliges **Crear Usuario** o **Login**. El botón 🌙 / �
 | 1 | Email | El correo de tu cuenta |
 | 2 | Password | Tu contraseña |
 | 3 | Iniciar Sesion | Pide el código de tu verificación en dos pasos; al escribirlo y pulsar **Verificar** entras y ves los menús **🏠 Casas** y **💬 Chat** |
+| 4 | ¿Olvidaste tu contraseña? | Abre la recuperación por correo (ver más abajo) |
 
 Si el correo o la contraseña no coinciden, el mensaje es el mismo («Credenciales inválidas»), para
 no revelar qué correos están registrados. La sesión se cierra sola tras **4 horas** sin actividad.
