@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { UsersService } from '../users/users.service';
-import { enviarCorreo } from './correo';
+import { enviarCorreo, NOMBRE_PORTAL } from './correo';
 import { EVENTOS } from './auditoria.service';
 import { MENSAJE_BLOQUEO, Metodo, MfaService } from './mfa.service';
 
@@ -250,10 +250,10 @@ export class AuthService {
     await enviarCorreo(
       user.email,
       user.name,
-      'Restablece tu contraseña · ColombiaTech',
+      `Restablece tu contraseña · ${NOMBRE_PORTAL}`,
       `Hola ${user.name},\n\nPara crear una contraseña nueva abre este enlace (vence en ${RECUPERAR_MINUTOS} ` +
         `minutos y sirve una vez):\n\n${enlace}\n\nSi no fuiste tú, ignora este correo: tu contraseña no cambia.`,
-      `<p>Hola ${escapar(user.name)},</p><p>Para crear una contraseña nueva en <strong>ColombiaTech</strong>:</p>` +
+      `<p>Hola ${escapar(user.name)},</p><p>Para crear una contraseña nueva en <strong>${NOMBRE_PORTAL}</strong>:</p>` +
         `<p><a href="${escapar(enlace)}" style="background:#059669;color:#fff;padding:10px 18px;` +
         `border-radius:6px;text-decoration:none">Crear contraseña nueva</a></p><p>El enlace vence en ` +
         `${RECUPERAR_MINUTOS} minutos y sirve una sola vez. Si no fuiste tú, ignora este correo.</p>`,

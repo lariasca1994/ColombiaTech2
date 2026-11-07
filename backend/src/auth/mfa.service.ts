@@ -3,7 +3,7 @@ import { createCipheriv, createDecipheriv, createHmac, hkdfSync, randomBytes, ra
 import * as QRCode from 'qrcode';
 import { UsersService } from '../users/users.service';
 import { AuditoriaService, EVENTOS } from './auditoria.service';
-import { enviarCorreo } from './correo';
+import { enviarCorreo, NOMBRE_PORTAL } from './correo';
 
 // Verificación en dos pasos (obligatoria). Cada cuenta usa al menos uno de dos métodos:
 // - App autenticadora (TOTP, RFC 6238): la clave se guarda cifrada con AES-256-GCM (llave
@@ -15,7 +15,9 @@ import { enviarCorreo } from './correo';
 export type Metodo = 'totp' | 'correo';
 export const METODOS: Record<Metodo, string> = { totp: 'App autenticadora', correo: 'Código por correo' };
 
-const EMISOR = 'ColombiaTech';
+// Emisor que muestra la app autenticadora en los QR nuevos. Los TOTP ya configurados no cambian:
+// su clave no depende de este nombre (ni la llave de cifrado de abajo, que se deja como estaba).
+const EMISOR = NOMBRE_PORTAL;
 const PASO = 30;
 const CODIGO_MIN = 10;
 const MAX_INTENTOS = 5;

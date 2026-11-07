@@ -196,6 +196,10 @@ La sesión se cierra sola tras 4 horas sin actividad.
 - **Perdí mi autenticador** (en la pantalla del código): envía un código de 6 dígitos al correo de
   la cuenta, aunque el método por correo no esté activo; al verificarlo pide configurar la app
   autenticadora nueva (QR) y la anterior deja de servir.
+- Todos los correos (asunto, encabezado, pie y nombre del remitente) y la entrada de la app
+  autenticadora llevan el nombre del portal, **Alquiler de vivienda**. Las cuentas que ya tenían
+  la app configurada siguen funcionando igual (en la app puede seguir viéndose el nombre anterior
+  hasta que se configure de nuevo).
 - El botón 🌙 / ☀️ alterna entre tema oscuro y claro.
 
 ### Si el servicio no responde
@@ -230,7 +234,8 @@ npm run start:dev
 
 El `.env` requiere la cadena de conexión a MongoDB, un secreto para firmar los
 tokens y las credenciales de Cloudinary. La plantilla indica el nombre de cada
-variable.
+variable. Para enviar correos se agregan la clave de Brevo, el correo del remitente y, si se
+quiere, su nombre (vacío usa **Alquiler de vivienda**).
 
 Queda escuchando en `http://localhost:3000`.
 

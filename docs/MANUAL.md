@@ -124,7 +124,7 @@ recibirlo:
 
 | Método | Cómo funciona |
 |---|---|
-| **App autenticadora** (recomendado) | Escaneas un código QR con Google Authenticator, Microsoft Authenticator u otra app; desde ese momento la app muestra un código nuevo cada 30 segundos, incluso sin internet. Si no puedes escanear, escribe la clave que aparece bajo el QR. |
+| **App autenticadora** (recomendado) | Escaneas un código QR con Google Authenticator, Microsoft Authenticator u otra app; desde ese momento la app muestra un código nuevo cada 30 segundos, incluso sin internet. Si no puedes escanear, escribe la clave que aparece bajo el QR. En la app la cuenta aparece como **Alquiler de vivienda** (si la configuraste antes con otro nombre, sigue funcionando igual). |
 | **Código por correo** | Cada vez que ingresas te llega un código de 6 dígitos que vence en 10 minutos y sirve una sola vez. |
 
 Confirma el método escribiendo el primer código. Desde tu avatar → **Seguridad** puedes **agregar el
@@ -157,6 +157,9 @@ aunque no tengas el teléfono a mano.
    en dos pasos **sigue activa**: al ingresar se te pedirá el código como siempre.
 
 Se pueden pedir como máximo 3 enlaces cada 15 minutos por correo; pedirlos no bloquea el ingreso.
+
+Todos los correos de la plataforma (enlaces y códigos) llegan con el remitente **Alquiler de
+vivienda** y ese nombre en el asunto, el encabezado y el pie.
 
 ### 4.4 Ver casas
 

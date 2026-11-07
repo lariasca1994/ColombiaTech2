@@ -4,6 +4,24 @@ import { Logger } from '@nestjs/common';
 // Sin BREVO_API_KEY (desarrollo) no envía nada: escribe el aviso en el log.
 const logger = new Logger('Correo');
 
+// Nombre descriptivo con el que el público ve el portal: asunto, encabezado, pie, remitente
+// y emisor del QR de la app autenticadora. Servicios, URLs y variables conservan su nombre.
+export const NOMBRE_PORTAL = 'Alquiler de vivienda';
+const NOMBRE_ANTERIOR = /colombia\s*tech/i;
+
+/** Nombre del remitente: BREVO_REMITENTE_NOMBRE, o el del portal si viene vacía o con el nombre anterior. */
+export function nombreRemitente(): string {
+  const valor = (process.env.BREVO_REMITENTE_NOMBRE || '').trim();
+  return !valor || NOMBRE_ANTERIOR.test(valor) ? NOMBRE_PORTAL : valor;
+}
+
+/** Correo del remitente; admite BREVO_REMITENTE como "correo" o "Nombre <correo>". */
+export function correoRemitente(): string {
+  const valor = (process.env.BREVO_REMITENTE || '').trim();
+  const m = valor.match(/<([^>]+)>/);
+  return (m ? m[1] : valor).trim();
+}
+
 // Colores del sitio (Tailwind: barra gray-800, acento emerald-600, fondo
 // emerald-50 de la portada): el correo se ve como la aplicación.
 const C = {
@@ -35,10 +53,10 @@ export function documento(asunto: string, contenido: string): string {
     `<tr><td style="background:${C.cabecera};border-top:4px solid ${C.acento};padding:16px 28px;">` +
     `<img src="${sitio}/apple-touch-icon.png" width="28" height="28" alt="" ` +
     'style="vertical-align:middle;border:0;border-radius:6px;margin-right:10px;">' +
-    `<span style="vertical-align:middle;font-size:17px;font-weight:700;color:${C.cabeceraTexto};">ColombiaTech</span></td></tr>` +
+    `<span style="vertical-align:middle;font-size:17px;font-weight:700;color:${C.cabeceraTexto};">${NOMBRE_PORTAL}</span></td></tr>` +
     `<tr><td style="padding:24px 28px 12px;font-size:15px;line-height:1.6;color:${C.texto};">${contenido}</td></tr>` +
     `<tr><td style="padding:16px 28px 22px;border-top:1px solid ${C.borde};font-size:12px;line-height:1.5;color:${C.suave};">` +
-    'Correo automático de ColombiaTech. Si no esperabas este mensaje, puedes ignorarlo.</td></tr>' +
+    `Correo automático de ${NOMBRE_PORTAL}. Si no esperabas este mensaje, puedes ignorarlo.</td></tr>` +
     '</table></td></tr></table></body></html>'
   );
 }
@@ -51,7 +69,7 @@ export async function enviarCorreo(
   html: string,
 ): Promise<boolean> {
   const clave = (process.env.BREVO_API_KEY || '').trim();
-  const remitente = (process.env.BREVO_REMITENTE || '').trim();
+  const remitente = correoRemitente();
   if (!clave || !remitente) {
     logger.log(`[correo local] Para ${destino} | ${asunto}\n${texto}`);
     return false;
@@ -61,7 +79,7 @@ export async function enviarCorreo(
       method: 'POST',
       headers: { 'api-key': clave, 'content-type': 'application/json', accept: 'application/json' },
       body: JSON.stringify({
-        sender: { email: remitente, name: 'ColombiaTech' },
+        sender: { email: remitente, name: nombreRemitente() },
         to: [{ email: destino, name: nombre }],
         subject: asunto,
         textContent: texto,
