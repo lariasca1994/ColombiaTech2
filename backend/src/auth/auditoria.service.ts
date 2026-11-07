@@ -13,6 +13,8 @@ export const EVENTOS = {
   claveCambiada: 'clave_cambiada',
   recuperacion: 'recuperacion_solicitada',
   metodoActivado: 'metodo_activado',
+  autenticadorPerdido: 'autenticador_perdido',
+  autenticadorReemplazado: 'autenticador_reemplazado',
 } as const;
 
 const RETENCION_DIAS = 15;

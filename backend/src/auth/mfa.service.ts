@@ -10,6 +10,8 @@ import { enviarCorreo } from './correo';
 //   derivada de JWT_SECRET con HKDF); un código no se acepta dos veces y 5 errados la bloquean 15 min.
 // - Código por correo: 6 dígitos que vencen en 10 min; solo se guarda su huella (HMAC), admite
 //   5 intentos y se pueden pedir 3 cada 10 minutos.
+// - "Perdí mi autenticador": código de 6 dígitos al correo de la cuenta (aunque el método correo no
+//   esté activo) que vence en 15 min; 3 envíos cada 15 min y 5 errados bloquean la recuperación 15 min.
 export type Metodo = 'totp' | 'correo';
 export const METODOS: Record<Metodo, string> = { totp: 'App autenticadora', correo: 'Código por correo' };
 
@@ -19,6 +21,7 @@ const CODIGO_MIN = 10;
 const MAX_INTENTOS = 5;
 const MAX_ENVIOS = 3;
 const BLOQUEO_SEG = 15 * 60;
+const RECUPERAR_MIN = 15;
 const MAX_FALLOS_CLAVE = 5;
 const BLOQUEO_CLAVE_SEG = 15 * 60;
 export const MENSAJE_BLOQUEO = 'Demasiados intentos fallidos. Espera unos minutos e inténtalo de nuevo.';
@@ -182,6 +185,65 @@ export class MfaService {
     return true;
   }
 
+  // ─── "Perdí mi autenticador" ───
+  recuperacionBloqueada(u: Usuario): boolean {
+    return (this.estado(u).bloqueo_recuperacion_hasta || 0) > Date.now() / 1000;
+  }
+
+  // Envía el código de recuperación al correo de la cuenta. Falso si se superó el límite de envíos.
+  async enviarRecuperacion(u: Usuario): Promise<boolean> {
+    const ahora = Date.now() / 1000;
+    const envios = (this.estado(u).envios_recuperacion || []).filter((t: number) => ahora - t < RECUPERAR_MIN * 60);
+    if (envios.length >= MAX_ENVIOS) return false;
+    const codigo = String(randomInt(0, 1_000_000)).padStart(6, '0');
+    await this.guardar(u, {
+      recuperacion: { huella: this.huella(codigo), expira: ahora + RECUPERAR_MIN * 60, intentos: 0 },
+      envios_recuperacion: [...envios, ahora],
+    });
+    const nombre = u.name || '';
+    await enviarCorreo(
+      u.email, nombre, `Recupera tu verificación en dos pasos · ${EMISOR}`,
+      `Hola ${nombre},
+
+Pediste ingresar sin tu app autenticadora. Tu código es: ${codigo}
+
+` +
+        `Vence en ${RECUPERAR_MIN} minutos y sirve una sola vez. Después tendrás que configurar la app de nuevo. ` +
+        `Si no fuiste tú, cambia tu contraseña.`,
+      `<p>Hola ${nombre.replace(/[<>&"']/g, '')},</p><p>Pediste ingresar sin tu app autenticadora. Tu código es:</p>` +
+        `<p style="font-size:28px;font-weight:700;letter-spacing:6px">${codigo}</p>` +
+        `<p>Vence en ${RECUPERAR_MIN} minutos y sirve una sola vez. Después tendrás que configurar la app de nuevo. ` +
+        `Si no fuiste tú, cambia tu contraseña.</p>`,
+    );
+    return true;
+  }
+
+  // 5 códigos errados seguidos bloquean la recuperación 15 minutos (y anulan el código enviado).
+  async verificarRecuperacion(u: Usuario, codigo: string): Promise<boolean> {
+    if (this.recuperacionBloqueada(u)) return false;
+    const g = this.estado(u).recuperacion;
+    if (!g || g.expira < Date.now() / 1000) return false;
+    if (!MfaService.iguales(g.huella, this.huella(MfaService.limpiar(codigo)))) {
+      const intentos = (g.intentos || 0) + 1;
+      await this.guardar(
+        u,
+        intentos >= MAX_INTENTOS
+          ? { recuperacion: null, bloqueo_recuperacion_hasta: Date.now() / 1000 + BLOQUEO_SEG }
+          : { recuperacion: { ...g, intentos } },
+      );
+      return false;
+    }
+    await this.guardar(u, { recuperacion: null });
+    return true;
+  }
+
+  // Activa la app nueva (QR entregado tras la recuperación): reemplaza a la anterior y queda preferida.
+  async reemplazarTotp(u: Usuario, codigo: string): Promise<boolean> {
+    if (!(await this.activarTotp(u, codigo))) return false;
+    await this.guardar(u, { preferido: 'totp', fallos: 0, bloqueo_hasta: 0 });
+    return true;
+  }
+
   // ─── verificación ───
   async verificar(u: Usuario, metodo: Metodo, codigo: string): Promise<boolean> {
     const limpio = MfaService.limpiar(codigo);
@@ -210,6 +272,11 @@ export class MfaService {
     return this.auditoria.registrar(tipo, u._id.toString());
   }
 
+  // Fecha (segundos) desde la que valen las sesiones; 0 si nunca se cerraron.
+  sesionesDesde(u: Usuario): number {
+    return this.estado(u).sesiones_desde || 0;
+  }
+
   claveBloqueada(u: Usuario): boolean {
     return (this.estado(u).bloqueo_clave_hasta || 0) > Date.now() / 1000;
   }
@@ -231,8 +298,11 @@ export class MfaService {
   }
 
   // Contraseña nueva (recuperación o cambio): se levanta el bloqueo y queda en la auditoría.
-  async claveRestablecida(u: Usuario): Promise<void> {
-    await this.guardar(u, { fallos_clave: 0, bloqueo_clave_hasta: 0 });
+  // Con cerrarSesiones, los tokens emitidos antes de este momento dejan de valer (ver jwt.strategy.ts).
+  async claveRestablecida(u: Usuario, cerrarSesiones = false): Promise<void> {
+    const cambios: Record<string, any> = { fallos_clave: 0, bloqueo_clave_hasta: 0 };
+    if (cerrarSesiones) cambios.sesiones_desde = Math.floor(Date.now() / 1000);
+    await this.guardar(u, cambios);
     await this.registrar(EVENTOS.claveCambiada, u);
   }
 }

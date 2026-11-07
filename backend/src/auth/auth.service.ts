@@ -111,14 +111,16 @@ export class AuthService {
     };
   }
 
-  private async usuarioDelPase(pase: string) {
+  // tipo 'mfa': pase del login; tipo 'reconfigurar': pase que entrega "Perdí mi autenticador"
+  // y solo sirve para activar la app nueva.
+  private async usuarioDelPase(pase: string, tipo: 'mfa' | 'reconfigurar' = 'mfa') {
     let carga: { sub: string; tipo: string };
     try {
       carga = await this.jwtService.verifyAsync(pase || '', { secret: secretoPase() });
     } catch {
       throw new UnauthorizedException('El paso de verificación venció; vuelve a ingresar');
     }
-    const u = carga.tipo === 'mfa' ? await this.mfa.cargar(carga.sub) : null;
+    const u = carga.tipo === tipo ? await this.mfa.cargar(carga.sub) : null;
     if (!u || (u as any).active === false) throw new UnauthorizedException('El paso de verificación venció; vuelve a ingresar');
     return u;
   }
@@ -165,6 +167,46 @@ export class AuthService {
       await this.mfa.registrar(EVENTOS.codigoErrado, u);
       throw new UnauthorizedException('El código no es correcto o ya venció');
     }
+    await this.mfa.registrar(EVENTOS.ingreso, u);
+    return this.sesion(u._id.toString());
+  }
+
+  // ─── "Perdí mi autenticador" (con el pase del login) ───
+  // El código va al correo de la cuenta aunque el método correo no esté activo.
+  async mfaRecuperarEnviar(pase: string) {
+    const u = await this.usuarioDelPase(pase);
+    if (!this.mfa.configurado(u)) throw new BadRequestException('Aún no configuras la verificación en dos pasos');
+    if (this.mfa.recuperacionBloqueada(u)) throw new HttpException(MENSAJE_BLOQUEO, 429);
+    if (!(await this.mfa.enviarRecuperacion(u))) {
+      throw new HttpException('Pediste varios códigos seguidos; espera unos minutos', 429);
+    }
+    await this.mfa.registrar(EVENTOS.autenticadorPerdido, u);
+    return { detail: `Te enviamos un código a ${u.email}. Vence en 15 minutos.` };
+  }
+
+  // Código correcto: entrega el QR de la app nueva y un pase que solo sirve para activarla.
+  async mfaRecuperarVerificar(pase: string, codigo: string) {
+    const u = await this.usuarioDelPase(pase);
+    if (this.mfa.recuperacionBloqueada(u)) throw new HttpException(MENSAJE_BLOQUEO, 429);
+    if (!(await this.mfa.verificarRecuperacion(u, codigo))) {
+      await this.mfa.registrar(EVENTOS.codigoErrado, u);
+      if (this.mfa.recuperacionBloqueada(u)) throw new HttpException(MENSAJE_BLOQUEO, 429);
+      throw new UnauthorizedException('El código no es correcto o ya venció');
+    }
+    const app = await this.mfa.iniciarTotp(u);
+    return {
+      ...app,
+      pase: await this.jwtService.signAsync(
+        { sub: u._id.toString(), tipo: 'reconfigurar' },
+        { secret: secretoPase(), expiresIn: '15m' },
+      ),
+    };
+  }
+
+  async mfaRecuperarActivar(pase: string, codigo: string): Promise<AuthResult> {
+    const u = await this.usuarioDelPase(pase, 'reconfigurar');
+    if (!(await this.mfa.reemplazarTotp(u, codigo))) throw new BadRequestException('El código no es correcto o ya venció');
+    await this.mfa.registrar(EVENTOS.autenticadorReemplazado, u);
     await this.mfa.registrar(EVENTOS.ingreso, u);
     return this.sesion(u._id.toString());
   }
@@ -232,7 +274,8 @@ export class AuthService {
       throw new BadRequestException(ENLACE_INVALIDO);
     }
     await this.usersService.setPassword(carga.sub, password);
-    await this.claveRestablecida(carga.sub);
+    // Cierra todas las sesiones abiertas; la verificación en dos pasos sigue igual.
+    await this.claveRestablecida(carga.sub, true);
   }
 
   async cambiarContrasena(userId: string, actual: string, nueva: string): Promise<void> {
@@ -247,8 +290,8 @@ export class AuthService {
     await this.claveRestablecida(userId);
   }
 
-  private async claveRestablecida(id: string): Promise<void> {
+  private async claveRestablecida(id: string, cerrarSesiones = false): Promise<void> {
     const u = await this.mfa.cargar(id);
-    if (u) await this.mfa.claveRestablecida(u);
+    if (u) await this.mfa.claveRestablecida(u, cerrarSesiones);
   }
 }

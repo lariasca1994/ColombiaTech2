@@ -22,3 +22,9 @@ export class MfaCodigoDto extends MfaMetodoDto {
   @Length(6, 8)
   readonly codigo: string;
 }
+
+export class MfaPaseCodigoDto extends MfaPaseDto {
+  @IsString()
+  @Length(6, 8)
+  readonly codigo: string;
+}

@@ -84,7 +84,7 @@ Qué servicio de nube, base de datos o API usa el proyecto y para qué sirve cad
 
 ### 4.1 Portada
 
-![Portada de ColombiaTech2](img/manual/01-portada.png)
+![Portada de Alquiler de vivienda](img/manual/01-portada.png)
 
 Desde el menú superior eliges **Crear Usuario** o **Login**. El botón 🌙 / ☀️ cambia el tema.
 
@@ -128,12 +128,30 @@ Confirma el método escribiendo el primer código. Desde tu avatar → **Segurid
 método que no elegiste** y escoger cuál se pide **por defecto**; tener los dos te permite entrar
 aunque no tengas el teléfono a mano.
 
+#### Perdí mi autenticador
+
+![Pantalla del código con el enlace Perdí mi autenticador](img/manual/08-perdi-autenticador.png)
+
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Código de 6 dígitos | El código de tu app autenticadora (o del correo, si ese es tu método) |
+| 2 | Perdí mi autenticador | Siempre visible: envía un código de 6 dígitos al correo de tu cuenta, **aunque no hayas activado el código por correo** |
+
+1. Pulsa **Perdí mi autenticador**: llega un código al correo de tu cuenta. Vence en **15 minutos**
+   y sirve una sola vez; si no llega, usa **Enviar otro código** (hay un límite de envíos).
+2. Escríbelo y pulsa **Verificar**. Con **5 códigos errados** la recuperación queda bloqueada
+   **15 minutos**.
+3. Aparece un código QR nuevo: escanéalo con tu app autenticadora y escribe el código que muestra.
+   Al pulsar **Activar** entras, y la app anterior deja de servir.
+
 #### ¿Olvidaste tu contraseña?
 
 1. En el inicio de sesión pulsa **¿Olvidaste tu contraseña?** y escribe el correo de tu cuenta.
 2. La respuesta es la misma exista o no la cuenta. Si existe, llega un correo con el enlace
    **Crear contraseña nueva**: vence en 30 minutos y sirve una sola vez.
 3. Escribe la nueva contraseña (misma regla del registro) y su confirmación, y vuelve a ingresar.
+   Al guardarla **se cierran todas las sesiones abiertas** (en cualquier equipo) y tu verificación
+   en dos pasos **sigue activa**: al ingresar se te pedirá el código como siempre.
 
 Se pueden pedir como máximo 3 enlaces cada 15 minutos por correo; pedirlos no bloquea el ingreso.
 
@@ -250,6 +268,10 @@ Comprobado en el código del proyecto (`backend/src/auth`, `users`, `houses`, `u
   inmueble, ver o modificar una cuenta o cambiar un avatar; el resto recibe un error 403. Esto se
   aplica igual por REST y por GraphQL.
 - **Cuentas suspendidas** no pueden iniciar sesión, y si ya tenían un token, deja de servir.
+- **Restablecer la contraseña cierra todas las sesiones:** los tokens emitidos antes del cambio
+  dejan de servir y el navegador vuelve al inicio de sesión.
+- **Recuperación del autenticador por correo:** el código vence, tiene límite de envíos e intentos,
+  y la app nueva reemplaza a la anterior solo cuando se activa.
 - **Validación en el servidor** de todos los datos de entrada (la API descarta los campos que no
   esperaba).
 - **Imágenes controladas:** solo JPG, PNG, GIF o WEBP, con un máximo de 5 MB.
@@ -257,8 +279,8 @@ Comprobado en el código del proyecto (`backend/src/auth`, `users`, `houses`, `u
 - **Secretos fuera del repositorio:** la conexión a MongoDB, la clave JWT y las credenciales de
   Cloudinary viven en variables de entorno de Render.
 - **Bloqueo temporal** ante intentos fallidos repetidos de contraseña o de código.
-- **Registro de eventos de seguridad:** ingresos, intentos fallidos, bloqueos y cambios de
-  contraseña quedan registrados (nunca contraseñas ni códigos) y se depuran solos.
+- **Registro de eventos de seguridad:** ingresos, intentos fallidos, bloqueos, cambios de
+  contraseña y recuperaciones del autenticador quedan registrados (nunca contraseñas ni códigos) y se depuran solos.
 - **Al día en seguridad:** el runtime, el sistema y las dependencias se mantienen con los últimos
   parches y se revisan periódicamente.
 

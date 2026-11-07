@@ -145,7 +145,8 @@ negocio entre capas.
 2. Ingresa **Email** y **Password** y pulsa **Iniciar Sesion**.
 3. Escribe el código de 6 dígitos de tu app o de tu correo y pulsa **Verificar**. La primera vez
    eliges el método (**App autenticadora** o **Código por correo**); en tu avatar → **Seguridad**
-   puedes agregar el otro y elegir cuál se pide por defecto.
+   puedes agregar el otro y elegir cuál se pide por defecto. Si perdiste el teléfono, pulsa
+   **Perdí mi autenticador**.
 4. Al entrar, el menú cambia y muestra las secciones **🏠 Casas** y **💬 Chat**.
 
 La sesión se cierra sola tras 4 horas sin actividad.
@@ -188,9 +189,13 @@ La sesión se cierra sola tras 4 horas sin actividad.
 - Pulsa tu avatar (arriba a la derecha) para abrir el menú de cuenta:
   - **Profile:** edita nombre, apellido, correo y avatar.
   - **Change Password:** pide la contraseña actual y la nueva dos veces.
-- **¿Olvidaste tu contraseña?** (en el login): envía por correo (API de Brevo) un enlace que vence
-  en 30 minutos y sirve una sola vez.
   - **Logout:** cierra la sesión.
+- **¿Olvidaste tu contraseña?** (en el login): envía por correo (API de Brevo) un enlace que vence
+  en 30 minutos y sirve una sola vez. Al guardar la contraseña nueva se cierran todas las sesiones
+  abiertas y la verificación en dos pasos sigue activa.
+- **Perdí mi autenticador** (en la pantalla del código): envía un código de 6 dígitos al correo de
+  la cuenta, aunque el método por correo no esté activo; al verificarlo pide configurar la app
+  autenticadora nueva (QR) y la anterior deja de servir.
 - El botón 🌙 / ☀️ alterna entre tema oscuro y claro.
 
 ### Si el servicio no responde

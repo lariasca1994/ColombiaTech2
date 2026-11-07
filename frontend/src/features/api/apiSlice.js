@@ -1,19 +1,37 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { logout } from '../authSlice'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
+const consulta = fetchBaseQuery({
+    baseUrl: API_URL,
+    prepareHeaders: (headers, { getState }) => {
+        const token = getState().auth.token
+        if (token) {
+            headers.set('Authorization', `Bearer ${token}`);
+        }
+        return headers;
+    }
+}) // Hace las veces de Axios
+
+// Si el servidor rechaza la sesión (p. ej. porque la contraseña se restableció y se
+// cerraron todas las sesiones), se borra la sesión local y se vuelve al ingreso.
+// Las rutas del ingreso no cuentan: allí un 401 es un código o una contraseña errados.
+const PUBLICAS = /^\/?auth\/(login|recuperar|restablecer|mfa\/(configurar|activar|correo|verificar|recuperar))/
+const consultaConSesion = async (args, api, extra) => {
+    const respuesta = await consulta(args, api, extra)
+    const url = typeof args === 'string' ? args : args.url
+    if (respuesta.error?.status === 401 && api.getState().auth.token && !PUBLICAS.test(url)) {
+        localStorage.removeItem('sessionData')
+        api.dispatch(logout())
+        if (window.location.pathname !== '/login') window.location.assign('/login')
+    }
+    return respuesta
+}
+
 export const apiSlice = createApi({
     reducerPath: "api",
-    baseQuery: fetchBaseQuery({
-        baseUrl: API_URL,
-        prepareHeaders: (headers, { getState }) => {
-            const token = getState().auth.token
-            if (token) {
-                headers.set('Authorization', `Bearer ${token}`);
-            }
-            return headers;
-        }
-    }), // Hace las veces de Axios
+    baseQuery: consultaConSesion,
     endpoints: (builder) => ({
         getUserById: builder.query({
             query: (_id) => '/users/' + _id,
@@ -74,6 +92,10 @@ export const apiSlice = createApi({
         mfaActivar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/activar', method: 'POST', body }) }),
         mfaVerificar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/verificar', method: 'POST', body }) }),
         mfaCorreo: builder.mutation({ query: (body) => ({ url: 'auth/mfa/correo', method: 'POST', body }) }),
+        // "Perdí mi autenticador": código al correo de la cuenta y, después, la app nueva (QR).
+        mfaRecuperar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/recuperar', method: 'POST', body }) }),
+        mfaRecuperarVerificar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/recuperar/verificar', method: 'POST', body }) }),
+        mfaRecuperarActivar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/recuperar/activar', method: 'POST', body }) }),
         getMfa: builder.query({ query: () => 'auth/mfa' }),
         mfaAgregar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/agregar', method: 'POST', body }) }),
         mfaAgregarActivar: builder.mutation({ query: (body) => ({ url: 'auth/mfa/agregar/activar', method: 'POST', body }) }),
@@ -96,6 +118,9 @@ export const { useGetUserByIdQuery,
     useMfaActivarMutation,
     useMfaVerificarMutation,
     useMfaCorreoMutation,
+    useMfaRecuperarMutation,
+    useMfaRecuperarVerificarMutation,
+    useMfaRecuperarActivarMutation,
     useGetMfaQuery,
     useMfaAgregarMutation,
     useMfaAgregarActivarMutation,

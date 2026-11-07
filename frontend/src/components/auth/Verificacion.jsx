@@ -3,7 +3,10 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Swal from 'sweetalert2'
 import { loginSuccess } from "../../features/authSlice";
-import { useMfaActivarMutation, useMfaConfigurarMutation, useMfaCorreoMutation, useMfaVerificarMutation } from "../../features/api/apiSlice";
+import {
+    useMfaActivarMutation, useMfaConfigurarMutation, useMfaCorreoMutation, useMfaRecuperarActivarMutation,
+    useMfaRecuperarMutation, useMfaRecuperarVerificarMutation, useMfaVerificarMutation,
+} from "../../features/api/apiSlice";
 import Portada from "./Portada";
 
 const CAMPO = "w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 " +
@@ -31,6 +34,11 @@ export default function Verificacion() {
     const [activar] = useMfaActivarMutation();
     const [verificar] = useMfaVerificarMutation();
     const [reenviar] = useMfaCorreoMutation();
+    const [pedirRecuperacion] = useMfaRecuperarMutation();
+    const [verificarRecuperacion] = useMfaRecuperarVerificarMutation();
+    const [activarRecuperacion] = useMfaRecuperarActivarMutation();
+    // Pase que entrega "Perdí mi autenticador": solo sirve para activar la app nueva.
+    const [paseNuevo, setPaseNuevo] = useState(null);
     const [modo, setModo] = useState(paso?.configurado ? "verificar" : "elegir");
     const [metodo, setMetodo] = useState(paso?.metodo || null);
     const [app, setApp] = useState(null);
@@ -70,13 +78,34 @@ export default function Verificacion() {
         if (otro === "correo") await enviarOtro();
     };
 
+    // "Perdí mi autenticador": código al correo de la cuenta (aunque ese método no esté activo).
+    const perdiAutenticador = async () => {
+        setError(""); setInfo("");
+        const r = await pedirRecuperacion({ pase: paso.pase });
+        if (r.error) return setError(mensajeError(r));
+        setInfo(r.data.detail);
+        setModo("recuperar");
+    };
+
     const enviar = async (e) => {
         e.preventDefault();
         setError(""); setOcupado(true);
         const codigo = e.target.codigo.value.replace(/\D/g, "");
-        const r = modo === "activar"
-            ? await activar({ pase: paso.pase, metodo, codigo })
-            : await verificar({ pase: paso.pase, metodo, codigo });
+        let r;
+        if (modo === "recuperar") {
+            r = await verificarRecuperacion({ pase: paso.pase, codigo });
+            setOcupado(false);
+            if (r.error) return setError(mensajeError(r));
+            e.target.reset();
+            setInfo("");
+            setApp(r.data);
+            setPaseNuevo(r.data.pase);
+            setMetodo("totp");
+            return setModo("reconfigurar");
+        }
+        if (modo === "reconfigurar") r = await activarRecuperacion({ pase: paseNuevo, codigo });
+        else if (modo === "activar") r = await activar({ pase: paso.pase, metodo, codigo });
+        else r = await verificar({ pase: paso.pase, metodo, codigo });
         setOcupado(false);
         if (r.error) return setError(mensajeError(r));
         terminar(r.data);
@@ -84,6 +113,10 @@ export default function Verificacion() {
 
     const subtitulo = modo === "elegir"
         ? "Además de la contraseña, cada ingreso pedirá un código. Elige cómo recibirlo; después puedes agregar el otro en Seguridad."
+        : modo === "recuperar"
+            ? `Te enviamos un código de 6 dígitos a ${paso.email}. Vence en 15 minutos. Al verificarlo configurarás tu app autenticadora nueva.`
+        : modo === "reconfigurar"
+            ? "Configura tu app autenticadora nueva: la anterior deja de funcionar cuando actives esta."
         : metodo === "totp"
             ? (modo === "activar" ? "Configura tu app autenticadora." : "Abre tu app autenticadora y escribe el código de 6 dígitos.")
             : `Te enviamos un código de 6 dígitos a ${paso.email}. Vence en 10 minutos.`;
@@ -102,7 +135,7 @@ export default function Verificacion() {
                 </div>
             ) : (
                 <>
-                    {modo === "activar" && metodo === "totp" && app && (
+                    {(modo === "activar" || modo === "reconfigurar") && metodo === "totp" && app && (
                         <div className="mb-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
                             <p>1. Escanea este código con tu app autenticadora.</p>
                             {/* SVG generado por el servidor (librería qrcode), no por el usuario. */}
@@ -116,13 +149,19 @@ export default function Verificacion() {
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5" htmlFor="codigo">Código de 6 dígitos</label>
                             <input type="text" id="codigo" name="codigo" required inputMode="numeric" pattern="[0-9 ]{6,7}" maxLength={7} autoComplete="one-time-code" autoFocus className={CAMPO} />
                         </div>
-                        <button type="submit" disabled={ocupado} className={BOTON}>{modo === "activar" ? "Activar" : "Verificar"}</button>
+                        <button type="submit" disabled={ocupado} className={BOTON}>{modo === "activar" || modo === "reconfigurar" ? "Activar" : "Verificar"}</button>
                     </form>
                     <p className="mt-4 text-center text-sm space-x-3">
                         {modo === "verificar" && metodo === "correo" && <button type="button" onClick={enviarOtro} className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">Enviar otro código</button>}
                         {modo === "verificar" && otro && <button type="button" onClick={cambiar} className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">Usar {NOMBRES[otro]}</button>}
                         {modo === "activar" && <button type="button" onClick={() => setModo("elegir")} className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">Elegir otro método</button>}
+                        {modo === "recuperar" && <button type="button" onClick={perdiAutenticador} className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">Enviar otro código</button>}
                     </p>
+                    {modo === "verificar" && (
+                        <p className="mt-3 text-center text-sm">
+                            <button type="button" onClick={perdiAutenticador} className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">Perdí mi autenticador</button>
+                        </p>
+                    )}
                 </>
             )}
             <p className="mt-6 text-center text-sm"><Link to="/login" className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">Volver a iniciar sesión</Link></p>

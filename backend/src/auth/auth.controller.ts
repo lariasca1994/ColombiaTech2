@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, HttpCode, Req, UseGuards } from '@nestjs/common';
 import { AuthService, AuthResult, PasoMfa } from './auth.service';
-import { MfaCodigoDto, MfaMetodoDto, MfaPaseDto } from './dto/mfa.dto';
+import { MfaCodigoDto, MfaMetodoDto, MfaPaseCodigoDto, MfaPaseDto } from './dto/mfa.dto';
 import { LoginDto } from './dto/login.dto';
 import { CambiarContrasenaDto, RecuperarDto, RestablecerDto } from './dto/contrasena.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -38,6 +38,25 @@ export class AuthController {
   @HttpCode(200)
   async mfaVerificar(@Body() dto: MfaCodigoDto): Promise<AuthResult> {
     return this.authService.mfaVerificar(dto.pase || '', dto.metodo, dto.codigo);
+  }
+
+  // ─── "Perdí mi autenticador" (con el pase del login) ───
+  @Post('mfa/recuperar')
+  @HttpCode(202)
+  async mfaRecuperarEnviar(@Body() dto: MfaPaseDto) {
+    return this.authService.mfaRecuperarEnviar(dto.pase);
+  }
+
+  @Post('mfa/recuperar/verificar')
+  @HttpCode(200)
+  async mfaRecuperarVerificar(@Body() dto: MfaPaseCodigoDto) {
+    return this.authService.mfaRecuperarVerificar(dto.pase, dto.codigo);
+  }
+
+  @Post('mfa/recuperar/activar')
+  @HttpCode(200)
+  async mfaRecuperarActivar(@Body() dto: MfaPaseCodigoDto): Promise<AuthResult> {
+    return this.authService.mfaRecuperarActivar(dto.pase, dto.codigo);
   }
 
   // ─── Seguridad del perfil (con sesión) ───
