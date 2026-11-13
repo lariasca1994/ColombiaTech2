@@ -36,7 +36,7 @@
 /* La pantalla que sale se desenfoca y se corre; la que entra llega por bloques
    desde el lado hacia donde se navega (--dir). Lo maneja <Transicion />. */
 .transicion-sale { animation: ct-salir .18s ease-in forwards; pointer-events: none; }
-.transicion-entra > * > * { animation: ct-entrar .5s var(--curva-suave) both; }
+.transicion-entra > * > * { animation: ct-entrar .5s var(--curva-suave) backwards; }
 .transicion-entra > * > :nth-child(2) { animation-delay: 45ms; }
 .transicion-entra > * > :nth-child(3) { animation-delay: 90ms; }
 .transicion-entra > * > :nth-child(4) { animation-delay: 135ms; }
@@ -49,10 +49,12 @@
 @keyframes ct-entrar { from { opacity: 0; transform: translate(calc(var(--dir, 1) * 22px), 8px); filter: blur(7px); } }
 @keyframes ct-entrar-arriba { from { opacity: 0; transform: translateY(calc(var(--dir, 1) * 22px)); filter: blur(7px); } }
 
+/* Las entradas usan fill-mode backwards: con both el transform quedaba aplicado al terminar
+   y convertía al contenedor en la referencia de los elementos fijos (la barra del teléfono). */
 /* Entre la portada y el resto de pantallas (por ejemplo, login ↔ registro):
    la página completa sale y la nueva entra desde el lado hacia donde se navega. */
 .pagina-sale { animation: ct-pagina-sale .2s ease-in forwards; pointer-events: none; }
-.pagina-entra { animation: ct-pagina-entra .55s var(--curva-suave) both; }
+.pagina-entra { animation: ct-pagina-entra .55s var(--curva-suave) backwards; }
 @keyframes ct-pagina-sale { to { opacity: 0; transform: translateX(calc(var(--dir, 1) * -40px)); filter: blur(6px); } }
 @keyframes ct-pagina-entra { from { opacity: 0; transform: translateX(calc(var(--dir, 1) * 48px)); filter: blur(8px); } }
 
@@ -129,7 +131,7 @@ form button[type="submit"][class*="bg-emerald-6"]:disabled::after {
     30%, 50%, 70% { transform: translateX(-5px); }
     40%, 60% { transform: translateX(5px); }
 }
-[role="alert"], [role="status"]:not(.mnt) { animation: ct-aviso .35s var(--curva-suave) both; }
+[role="alert"], [role="status"]:not(.mnt) { animation: ct-aviso .35s var(--curva-suave) backwards; }
 @keyframes ct-aviso { from { opacity: 0; transform: translateY(-6px); } }
 :focus-visible { outline: 2px solid var(--c-acento); outline-offset: 2px; }
 
@@ -213,7 +215,7 @@ html.menu-listo .app-con-menu { transition: grid-template-columns .4s var(--curv
     background: linear-gradient(to right, color-mix(in srgb, var(--c-acento-luz) 22%, transparent), transparent);
 }
 .menu-sin-anim .menu-ind, .menu-sin-anim .menu-hov { transition: none; }
-html.menu-primera .menu-op, html.menu-primera .menu-marca { animation: ct-entrar-menu .45s var(--curva-suave) both; animation-delay: calc(90ms + var(--k, 0) * 55ms); }
+html.menu-primera .menu-op, html.menu-primera .menu-marca { animation: ct-entrar-menu .45s var(--curva-suave) backwards; animation-delay: calc(90ms + var(--k, 0) * 55ms); }
 @keyframes ct-entrar-menu { from { opacity: 0; transform: translateX(-14px); } }
 .menu-pie { margin-top: auto; display: flex; flex-direction: column; gap: .15rem; padding-top: .75rem; border-top: 1px solid var(--c-borde); }
 .menu-usuario { display: flex; align-items: center; gap: .65rem; padding: .4rem .55rem; color: var(--c-texto); font-size: .85rem; white-space: nowrap; min-width: 0; }
@@ -285,7 +287,7 @@ html[data-menu="compacto"] .menu-etiqueta.visible { opacity: 1; transform: none;
         backdrop-filter: blur(18px) saturate(1.6);
         box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent), 0 14px 30px -8px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .12);
         z-index: 20;
-        animation: ct-subir-barra .55s .12s cubic-bezier(.2, .9, .3, 1.1) both;
+        animation: ct-subir-barra .55s .12s cubic-bezier(.2, .9, .3, 1.1) backwards;
     }
     .menu-marca, .menu-pie, .menu-etiqueta, .solo-amplio { display: none !important; }
     .solo-movil { display: flex !important; }
@@ -325,7 +327,7 @@ html[data-menu="compacto"] .menu-etiqueta.visible { opacity: 1; transform: none;
         box-shadow: 0 -18px 40px -12px rgba(0, 0, 0, .35);
     }
     .hoja-mas:not([open]) { display: none; }
-    .hoja-mas[open] { animation: ct-hoja-sube .38s cubic-bezier(.2, .9, .3, 1.05) both; }
+    .hoja-mas[open] { animation: ct-hoja-sube .38s cubic-bezier(.2, .9, .3, 1.05) backwards; }
     .hoja-mas.cerrando { animation: ct-hoja-baja .22s ease-in both; }
     .hoja-mas::backdrop { background: rgba(0, 0, 0, .35); }
     .hoja-mas::before { content: ""; display: block; width: 2.5rem; height: 4px; margin: -.5rem auto 1rem; border-radius: 4px; background: var(--c-borde); }
@@ -342,7 +344,7 @@ html[data-menu="compacto"] .menu-etiqueta.visible { opacity: 1; transform: none;
         color: var(--c-texto);
         font: inherit;
         text-align: left;
-        animation: ct-entrar .4s var(--curva-suave) both;
+        animation: ct-entrar .4s var(--curva-suave) backwards;
         animation-delay: calc(80ms + var(--k, 0) * 50ms);
     }
     .hoja-mas a[aria-current="page"] { color: var(--c-acento-texto); font-weight: 600; }
