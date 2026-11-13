@@ -43,3 +43,66 @@
     animation: none;
   }
 }
+
+/* ───── Paso del código: candado, seis casillas y anillo del tiempo ───── */
+.candado {
+  display: grid;
+  place-items: center;
+  width: 3.75rem;
+  height: 3.75rem;
+  margin: 0 0 1rem;
+  border-radius: 1.1rem;
+  background: var(--c-superficie);
+  color: theme('colors.emerald.600');
+  box-shadow: 6px 6px 14px -4px color-mix(in srgb, var(--c-fondo) 75%, #000), -6px -6px 14px -4px color-mix(in srgb, var(--c-superficie) 55%, #fff), inset 0 0 0 1px var(--c-borde);
+  animation: candado-flota 3.6s ease-in-out infinite;
+}
+[data-tema="oscuro"] .candado { color: theme('colors.emerald.400'); }
+.candado svg { width: 2.2rem; height: 2.2rem; overflow: visible; }
+.candado .arco { fill: none; stroke: currentColor; stroke-width: 3.4; stroke-linecap: round; transform-box: view-box; transform-origin: 33px 21px; transition: transform .5s cubic-bezier(.3, 1.4, .5, 1); }
+.candado .cuerpo { fill: currentColor; }
+.candado .ojo { fill: var(--c-superficie); transform-box: fill-box; transform-origin: center; transition: transform .4s ease; }
+.candado-verificando .ojo { animation: candado-gira 1s linear infinite; }
+.candado-abierto { color: theme('colors.emerald.500'); animation: none; }
+.candado-abierto .arco { transform: translateY(-6px) rotate(28deg); }
+.candado-abierto .ojo { transform: scale(.6); }
+.candado-error { color: theme('colors.rose.600'); animation: candado-sacude .45s ease both; }
+[data-tema="oscuro"] .candado-error { color: theme('colors.rose.400'); }
+@keyframes candado-flota { 50% { transform: translateY(-3px); } }
+@keyframes candado-gira { 50% { transform: scale(.6); } }
+@keyframes candado-sacude { 20% { transform: rotate(-12deg); } 40% { transform: rotate(10deg); } 60% { transform: rotate(-7deg); } 80% { transform: rotate(4deg); } }
+
+.casillas { position: relative; }
+.casillas > input {
+  position: absolute; inset: 0; z-index: 1; width: 100%; padding: 0; border: 0;
+  background: transparent; color: transparent; caret-color: transparent; font-size: 16px; outline: none; box-shadow: none;
+}
+.casillas-vista { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .55rem; }
+.casillas-vista span {
+  display: grid; place-items: center; height: 3.4rem;
+  border: 1.5px solid theme('colors.gray.500'); border-radius: .8rem;
+  background: var(--c-fondo); color: var(--c-texto);
+  font-size: 1.45rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  box-shadow: inset 3px 3px 7px -3px color-mix(in srgb, var(--c-fondo) 70%, #000), inset -3px -3px 7px -3px color-mix(in srgb, var(--c-superficie) 60%, #fff);
+  transition: border-color .2s, box-shadow .25s, transform .2s, background-color .2s;
+}
+[data-tema="oscuro"] .casillas-vista span { border-color: theme('colors.gray.500'); }
+.casillas-vista span.llena { background: var(--c-superficie); border-color: theme('colors.emerald.600'); box-shadow: 0 6px 14px -8px theme('colors.emerald.600'); }
+.casillas-vista span.pulso { animation: casilla-pulso .28s cubic-bezier(.3, 1.6, .5, 1); }
+.casillas-vista span.activa { border-color: theme('colors.emerald.600'); box-shadow: 0 0 0 4px color-mix(in srgb, theme('colors.emerald.600') 15%, transparent); }
+.casillas-vista span.activa:empty::after { content: ""; width: 2px; height: 1.4rem; background: theme('colors.emerald.600'); animation: cursor-parpadea 1s steps(1) infinite; }
+.casillas.completa .casillas-vista span { border-color: theme('colors.emerald.600'); }
+@keyframes casilla-pulso { 40% { transform: scale(1.12) translateY(-2px); } }
+@keyframes cursor-parpadea { 50% { opacity: 0; } }
+@media (max-width: 380px) { .casillas-vista { gap: .35rem; } .casillas-vista span { height: 3rem; font-size: 1.25rem; } }
+
+.anillo { display: flex; align-items: center; gap: .55rem; margin-top: .6rem; color: var(--c-suave); font-size: .85rem; }
+.anillo svg { width: 1.35rem; height: 1.35rem; flex: none; transform: rotate(-90deg); }
+.anillo circle { fill: none; stroke-width: 3; }
+.anillo .anillo-fondo { stroke: var(--c-borde); }
+.anillo .anillo-valor { stroke: theme('colors.emerald.600'); stroke-linecap: round; stroke-dasharray: 1; transition: stroke-dashoffset 1s linear; }
+.anillo.urgente .anillo-valor { stroke: theme('colors.amber.500'); }
+
+@media (prefers-reduced-motion: reduce) {
+  .candado, .candado .ojo, .casillas-vista span.pulso { animation: none !important; }
+}

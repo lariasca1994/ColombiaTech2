@@ -1,0 +1,102 @@
+/* Chat (solo presentación): encabezado con el estado en vivo, separadores de
+   día, burbujas propias a la derecha (esmeralda) y ajenas a la izquierda con
+   avatar, mensajes nuevos que entran deslizándose y barra de escritura
+   flotante con botón circular. Colores de Tailwind del proyecto. */
+.chat-marco { max-width: 56rem; margin: 0 auto; padding: 1.25rem 1rem; }
+.chat {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    height: min(78vh, 46rem);
+    border: 1px solid var(--c-borde);
+    border-radius: 20px;
+    background: var(--c-superficie);
+    color: var(--c-texto);
+    overflow: hidden;
+    box-shadow: 0 24px 48px -32px theme('colors.emerald.900');
+}
+.chat-cabecera { display: flex; align-items: center; gap: .8rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--c-borde); }
+.chat-cabecera h1 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+.chat-icono { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 12px; background: var(--c-acento-suave); color: var(--c-acento-texto); }
+.chat-icono svg { width: 1.3rem; height: 1.3rem; }
+.chat-estado { display: flex; align-items: center; gap: .4rem; margin: .1rem 0 0; font-size: .8rem; color: var(--c-suave); }
+.chat-estado i { width: .5rem; height: .5rem; border-radius: 50%; background: theme('colors.gray.400'); }
+.chat-estado.en-vivo { color: var(--c-acento-texto); font-weight: 600; }
+.chat-estado.en-vivo i { background: theme('colors.emerald.500'); box-shadow: 0 0 0 0 theme('colors.emerald.500'); animation: chat-latido 2s ease-out infinite; }
+@keyframes chat-latido { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, theme('colors.emerald.500') 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
+
+.chat-mensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.25rem 1.5rem;
+    background: var(--c-fondo);
+    box-shadow: inset 0 2rem 2rem -2rem rgba(0, 0, 0, .06), inset 0 -2rem 2rem -2rem rgba(0, 0, 0, .06);
+    scrollbar-width: thin;
+}
+.chat-dia { display: flex; justify-content: center; margin: 1rem 0 .5rem; }
+.chat-dia span { padding: .2rem .8rem; border-radius: 999px; background: var(--c-borde); color: var(--c-suave); font-size: .75rem; font-weight: 600; }
+.chat-fila { display: flex; align-items: flex-end; gap: .55rem; margin: .45rem 0; }
+.chat-fila.propia { justify-content: flex-end; }
+.chat-fila.nueva { animation: chat-entra .35s var(--curva-suave) both; }
+.chat-fila.propia.nueva { animation-name: chat-entra-propia; }
+@keyframes chat-entra { from { opacity: 0; transform: translate(-14px, 8px); } }
+@keyframes chat-entra-propia { from { opacity: 0; transform: translate(14px, 8px); } }
+.chat-avatar { flex: none; display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; object-fit: cover; background: var(--c-acento-suave); color: var(--c-acento-texto); font-size: .8rem; font-weight: 700; }
+.chat-burbuja {
+    max-width: min(70%, 28rem);
+    padding: .55rem .85rem .4rem;
+    border-radius: 18px 18px 18px 4px;
+    background: var(--c-superficie);
+    border: 1px solid var(--c-borde);
+    box-shadow: 0 6px 14px -12px rgba(0, 0, 0, .35);
+    overflow-wrap: anywhere;
+}
+.chat-burbuja p { margin: 0; line-height: 1.4; }
+.chat-autor { font-size: .75rem; font-weight: 700; color: var(--c-acento-texto); margin-bottom: .1rem !important; }
+.chat-burbuja time { display: block; margin-top: .2rem; font-size: .7rem; color: var(--c-suave); text-align: right; }
+.propia .chat-burbuja { border-radius: 18px 18px 4px 18px; border-color: transparent; background: theme('colors.emerald.600'); color: #fff; }
+.propia .chat-burbuja time { color: rgba(255, 255, 255, .85); }
+
+.chat-esqueleto { display: grid; gap: .8rem; }
+.chat-esqueleto span { width: 55%; height: 2.6rem; border-radius: 18px; background: linear-gradient(90deg, var(--c-borde) 25%, color-mix(in srgb, var(--c-borde) 40%, transparent) 50%, var(--c-borde) 75%); background-size: 200% 100%; animation: chat-brillo 1.4s linear infinite; }
+.chat-esqueleto span.propio { justify-self: end; width: 40%; }
+@keyframes chat-brillo { to { background-position: -200% 0; } }
+
+.chat-escribir {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin: .75rem;
+    padding: .4rem .4rem .4rem 1rem;
+    border: 1px solid var(--c-borde);
+    border-radius: 999px;
+    background: var(--c-superficie);
+    box-shadow: 0 10px 24px -16px rgba(0, 0, 0, .4);
+}
+.chat-escribir input { flex: 1; min-width: 0; padding: .55rem 0; border: 0; background: transparent; color: var(--c-texto); font-size: 16px; outline: none; }
+.chat-escribir:focus-within { border-color: theme('colors.emerald.600'); box-shadow: 0 0 0 4px color-mix(in srgb, theme('colors.emerald.600') 15%, transparent); }
+.chat-enviar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.9rem;
+    height: 2.9rem;
+    border: 0;
+    border-radius: 50%;
+    background: theme('colors.emerald.600');
+    color: #fff;
+    cursor: pointer;
+    transition: transform .2s var(--curva-rebote), background-color .2s;
+}
+.chat-enviar svg { width: 1.25rem; height: 1.25rem; }
+.chat-enviar:hover { background: theme('colors.emerald.700'); transform: rotate(-12deg) scale(1.05); }
+.chat-enviar:active { transform: scale(.92); }
+
+@media (max-width: 767px) {
+    .chat-marco { padding: .75rem .5rem; }
+    .chat { height: calc(100dvh - 12.5rem); border-radius: 16px; }
+    .chat-burbuja { max-width: 82%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .chat-fila.nueva, .chat-estado.en-vivo i, .chat-esqueleto span { animation: none !important; }
+}

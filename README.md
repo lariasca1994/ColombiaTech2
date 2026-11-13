@@ -125,8 +125,8 @@ negocio entre capas.
 
 ### 5.1 Crear una cuenta
 
-1. Entra a la [demo](https://colombia-tech2.vercel.app) y, en el menú superior,
-   elige **Crear Usuario**.
+1. Entra a la [demo](https://colombia-tech2.vercel.app) y, en la portada de acceso,
+   elige **Crea una** (debajo de Iniciar sesión).
 2. Completa el formulario:
 
    | Campo | Dato |
@@ -180,13 +180,13 @@ La sesión se cierra sola tras 4 horas sin actividad.
 
 ### 5.5 Chatear
 
-1. En **💬 Chat**, elige **Ir al chat**.
-2. Escribe en **Escribir mensaje...** y pulsa **Send**. Los mensajes llegan en
+1. En el menú lateral (en el teléfono, la barra de abajo), elige **Chat**.
+2. Escribe en **Escribir mensaje...** y pulsa el botón redondo de enviar. Los mensajes llegan en
    tiempo real.
 
 ### 5.6 Perfil, contraseña y tema
 
-- Pulsa tu avatar (arriba a la derecha) para abrir el menú de cuenta:
+- En el menú lateral (en el teléfono, en **Más**) están las opciones de la cuenta:
   - **Profile:** edita nombre, apellido, correo y avatar.
   - **Change Password:** pide la contraseña actual y la nueva dos veces.
   - **Logout:** cierra la sesión.

@@ -206,7 +206,7 @@ Al eliminar el inmueble, su imagen se borra también.
 
 | # | Campo | Qué escribir |
 |:-:|---|---|
-| 1 | Escribir mensaje... | Tu mensaje; pulsa **Send** para enviarlo |
+| 1 | Escribir mensaje... | Tu mensaje; pulsa el botón redondo de enviar |
 
 Es una **sala general**: el mensaje llega al instante a todas las personas que tengan el chat
 abierto y queda guardado con su fecha y hora.
@@ -215,7 +215,7 @@ abierto y queda guardado con su fecha y hora.
 
 ![Formulario de cambio de contraseña](img/manual/07-cambiar-clave.png)
 
-Desde tu avatar (arriba a la derecha) → **Change Password**:
+Desde el menú lateral (en el teléfono, en **Más**) → **Change Password**:
 
 | # | Campo | Qué escribir |
 |:-:|---|---|
@@ -229,7 +229,21 @@ El servidor comprueba la contraseña actual y guarda solo la huella de la nueva.
 En el mismo menú, **Profile** edita nombre, apellido, correo y avatar, y **Logout** cierra la
 sesión.
 
-### 4.8 Preguntas frecuentes
+### 4.8 Instalar la app en el teléfono o el computador
+
+Alquiler de vivienda se puede instalar como aplicación (PWA), sin tiendas de aplicaciones:
+
+1. **Android (Chrome):** abre la [demo](https://colombia-tech2.vercel.app), toca el menú ⋮ y elige
+   **Instalar aplicación** (o **Agregar a la pantalla principal**).
+2. **iPhone (Safari):** toca **Compartir** y elige **Agregar a pantalla de inicio**.
+3. **Computador (Chrome o Edge):** pulsa el ícono de instalar al final de la barra de direcciones.
+
+La app instalada abre en su propia ventana y, en el teléfono, el menú pasa a una barra abajo (con
+**Más** para las opciones de la cuenta). Necesita internet: sin conexión muestra una pantalla propia
+que se quita sola cuando vuelve la red. En el dispositivo solo se guardan los archivos de la
+aplicación, nunca tus casas, mensajes ni datos de la cuenta.
+
+### 4.9 Preguntas frecuentes
 
 **¿Por qué la primera carga tarda?** El servidor gratuito de Render se suspende sin uso y tarda
 hasta 50 segundos en despertar.
