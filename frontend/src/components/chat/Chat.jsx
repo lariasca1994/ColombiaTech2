@@ -2,15 +2,31 @@ import { useEffect, useRef, useState } from 'react'
 import io from 'socket.io-client'
 import { useGetMessagesQuery } from '../../features/api/apiMessageSlice'
 import { useSelector } from "react-redux";
+import './chat.css'
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000'
+
+// Presentación (solo visual): hora legible y separadores "Hoy" / "Ayer" en lugar de la fecha ISO.
+const hora = (iso) => new Date(iso).toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' })
+function dia(iso) {
+    const d = new Date(iso)
+    const hoy = new Date()
+    const ayer = new Date(); ayer.setDate(hoy.getDate() - 1)
+    if (d.toDateString() === hoy.toDateString()) return 'Hoy'
+    if (d.toDateString() === ayer.toDateString()) return 'Ayer'
+    return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+const nombreDe = (u) => [u?.name, u?.lastname].filter(Boolean).join(' ') || 'Usuario'
 
 export default function Chat() {
 
     const { data, isLoading, isError, error } = useGetMessagesQuery()
     const user = useSelector((state) => state.auth.user);
     const [messages, setMessage] = useState([])
+    const [conectado, setConectado] = useState(false)
     const socketRef = useRef(null)
+    const lista = useRef(null)
+    const nuevos = useRef(new Set())
 
     // CORRECCIÓN: el original creaba `io(...)` directamente en el cuerpo
     // del componente, así que se abría una conexión de socket NUEVA en
@@ -22,10 +38,12 @@ export default function Chat() {
         socketRef.current = socket
 
         socket.on('connect', () => {
-            console.log('connected')
+            setConectado(true)
         })
+        socket.on('disconnect', () => setConectado(false))
 
         socket.on('message-receipt', (newMessage) => {
+            if (newMessage?._id) nuevos.current.add(newMessage._id)
             setMessage((prev) => [...prev, newMessage])
         })
 
@@ -51,43 +69,72 @@ export default function Chat() {
         }
     }, [data])
 
+    // Siempre se ve el último mensaje.
+    useEffect(() => {
+        const l = lista.current
+        if (l) l.scrollTo({ top: l.scrollHeight, behavior: messages.length > 1 && nuevos.current.size ? 'smooth' : 'auto' })
+    }, [messages])
 
-    if (isLoading) return <div role="status" className='flex justify-center'>
-        <svg aria-hidden="true" className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-        </svg>
-        <span className="sr-only">Loading...</span>
-    </div>;
-    else if (isError) return (<div>Error: {error.message} </div>)
+    if (isError) return (<div role="alert" className="max-w-4xl mx-auto px-5 py-5">Error: {error.message} </div>)
+
+    let ultimoDia = null
 
     return (
-        <div className="max-w-4xl w-full mx-auto px-5 py-5">
-            <div className="bg-green-300 dark:bg-green-800 text-gray-800 dark:text-gray-100 p-4">
-                <h1 className="text-lg font-semibold">Chat</h1>
-            </div>
-            {/* Seccion de Mensajes */}
-            <div className="flex flex-col space-y-2">
-                {messages.map(message => (
-                    <div key={message._id}
-                        className={
-                            `${(message.from && user._id == message.from._id) ?
-                                'bg-pink-300 dark:bg-pink-800 self-end' :
-                                'bg-blue-300 dark:bg-blue-800 self-start'}
-                                 text-gray-700 dark:text-gray-100 py-2 px-4 rounded-lg max-w-xs`}>
-                        <p>{message.body}</p>
-                        <span className="text-xs text-gray-100 dark:text-gray-300 self-end">{message.createdAt}</span>
+        <div className="chat-marco">
+            <section className="chat" aria-label="Chat">
+                <header className="chat-cabecera">
+                    <div className="chat-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" /></svg>
                     </div>
-                ))}
-            </div>
-            <hr />
-            <form onSubmit={handleSubmit} className="flex bg-gray-300 dark:bg-gray-700 text-blue-400 p-4">
-                <input type="text"
-                    name="message"
-                    className="w-full bg-gray-100 dark:bg-gray-800 dark:text-gray-100 rounded-lg py-2 px-4"
-                    placeholder="Escribir mensaje... " />
-                <button className='bg-red-800 mx-2 rounded-lg p-2 text-yellow-400'>Send</button>
-            </form>
+                    <div>
+                        <h1>Chat</h1>
+                        <p className={`chat-estado${conectado ? ' en-vivo' : ''}`}>
+                            <i aria-hidden="true" />{conectado ? 'En vivo' : 'Conectando…'}
+                        </p>
+                    </div>
+                </header>
+
+                {/* Seccion de Mensajes */}
+                <div className="chat-mensajes" ref={lista} aria-live="polite">
+                    {isLoading ? (
+                        <div role="status" className="chat-esqueleto">
+                            {[0, 1, 2, 3].map((i) => <span key={i} className={i % 2 ? 'propio' : ''} />)}
+                            <span className="sr-only">Cargando mensajes…</span>
+                        </div>
+                    ) : messages.map(message => {
+                        const propio = message.from && user._id == message.from._id
+                        const d = message.createdAt ? dia(message.createdAt) : null
+                        const separador = d && d !== ultimoDia
+                        if (d) ultimoDia = d
+                        return (
+                            <div key={message._id} className="chat-grupo">
+                                {separador && <p className="chat-dia"><span>{d}</span></p>}
+                                <div className={`chat-fila${propio ? ' propia' : ''}${nuevos.current.has(message._id) ? ' nueva' : ''}`}>
+                                    {!propio && (message.from?.avatar
+                                        ? <img className="chat-avatar" src={message.from.avatar} alt="" />
+                                        : <span className="chat-avatar" aria-hidden="true">{nombreDe(message.from).slice(0, 1)}</span>)}
+                                    <div className="chat-burbuja">
+                                        {!propio && <p className="chat-autor">{nombreDe(message.from)}</p>}
+                                        <p>{message.body}</p>
+                                        {message.createdAt && <time dateTime={message.createdAt}>{hora(message.createdAt)}</time>}
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+
+                <form onSubmit={handleSubmit} className="chat-escribir">
+                    <label htmlFor="mensaje-chat" className="sr-only">Mensaje</label>
+                    <input id="mensaje-chat" type="text"
+                        name="message"
+                        autoComplete="off"
+                        placeholder="Escribir mensaje... " />
+                    <button className="chat-enviar" aria-label="Send">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+                    </button>
+                </form>
+            </section>
         </div>
     )
 }

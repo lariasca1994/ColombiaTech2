@@ -1,6 +1,13 @@
 import { Link } from "react-router-dom";
 import useTheme from "../../hooks/useTheme";
+import Transicion from "../navegacion/Transicion";
+import Candado from "./Candado";
 import "./portada.css";
+
+// Recuperar y restablecer entran hacia arriba; el resto de pasos avanza de lado.
+const ORDEN_ACCESO = ["/", "/login", "/verificacion", "/recuperar", "/restablecer"];
+const modoAcceso = (desde, hacia) =>
+    ["/recuperar", "/restablecer"].some((r) => desde.startsWith(r) || hacia.startsWith(r)) ? "arriba" : "avanza";
 
 const CASAS = [
   { ciudad: "Medellín", depto: "Antioquia", precio: "$ 420 M", tono: "from-emerald-400 to-teal-500" },
@@ -9,8 +16,10 @@ const CASAS = [
 ];
 
 /** Portada de acceso: panel de marca (casas por ciudad y un mensaje de
- *  chat que llega) y, al lado, la tarjeta que reciba como children. */
-export default function Portada({ paso, titulo, subtitulo, children }) {
+ *  chat que llega) y, al lado, la tarjeta de cada paso. El panel queda quieto
+ *  y solo las tarjetas cambian con la transición (layout de las rutas de
+ *  acceso en App.jsx). El diseño es el mismo de siempre. */
+export function PortadaMarco() {
   const { tema, alternarTema } = useTheme();
 
   return (
@@ -73,13 +82,22 @@ export default function Portada({ paso, titulo, subtitulo, children }) {
           {tema === "oscuro" ? "☀️" : "🌙"}
         </button>
 
-        <section className="relative z-10 w-full max-w-md rounded-2xl border border-emerald-900/10 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl shadow-emerald-900/10 p-6 sm:p-9">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400 mb-2">{paso}</p>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1.5">{titulo}</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">{subtitulo}</p>
-          {children}
-        </section>
+        <Transicion orden={ORDEN_ACCESO} modo={modoAcceso} className="relative z-10 w-full max-w-md" />
       </main>
     </div>
+  );
+}
+
+/** Tarjeta de un paso del acceso (iniciar sesión, código, recuperar...).
+ *  En el paso del código lleva el candado pequeño sobre el título. */
+export default function Portada({ paso, titulo, subtitulo, children, candado }) {
+  return (
+    <section className="w-full rounded-2xl border border-emerald-900/10 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl shadow-emerald-900/10 p-6 sm:p-9">
+      {candado && <Candado estado={candado} />}
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400 mb-2">{paso}</p>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1.5">{titulo}</h1>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">{subtitulo}</p>
+      {children}
+    </section>
   );
 }

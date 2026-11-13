@@ -1,8 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import "./App.css";
-import Footer from "./components/footer";
-import Header from "./components/header";
 import HouseList from "./components/house/HouseList";
 import Login from "./components/auth/Login";
 import UserFormCreate from "./components/user/UserFormCreate";
@@ -18,14 +16,14 @@ import HouseFormEdit from "./components/house/HouseFormEdit";
 import Chat from "./components/chat/Chat";
 import useInactivityLogout from "./hooks/useInactivityLogout";
 import Mantenimiento from "./components/Mantenimiento";
+import { PortadaMarco } from "./components/auth/Portada";
+import MarcoApp from "./components/navegacion/MarcoApp";
+import NoEncontrada from "./components/NoEncontrada";
 
 function InactivityWatcher() {
   useInactivityLogout(4 * 60 * 60 * 1000); // cierra sesión sola a las 4 horas sin actividad
   return null;
 }
-
-// La portada de acceso ocupa toda la pantalla: sin cabecera ni pie.
-const RUTAS_PORTADA = ["/", "/login", "/recuperar", "/restablecer", "/verificacion"];
 
 /** Inicio: la portada de acceso es la primera pantalla, igual que en el
  *  resto del portafolio; con sesión iniciada se va directo a las casas. */
@@ -35,38 +33,42 @@ function Inicio() {
 }
 
 function Marco() {
-  const { pathname } = useLocation();
-  const esPortada = RUTAS_PORTADA.includes(pathname);
-
   return (
     <>
       <InactivityWatcher />
       <Mantenimiento />
-      {!esPortada && <Header />}
       <Routes>
-        <Route path="/" element={<Inicio />} />
+        {/* Portada de acceso: el panel de marca queda quieto y solo cambian las tarjetas. */}
+        <Route element={<PortadaMarco />}>
+          <Route path="/" element={<Inicio />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/recuperar" element={<Recuperar />} />
+          <Route path="/restablecer" element={<Restablecer />} />
+          <Route path="/verificacion" element={<Verificacion />} />
+        </Route>
 
-        {/* Sección: Casas */}
-        <Route path="/house" element={<PrivateRoute Component={HouseList} />} />
-        <Route path="/house/:id" element={<PrivateRoute Component={HouseFormEdit} />} />
-        <Route path="/create-house" element={<PrivateRoute Component={HouseFormCreate} />} />
+        {/* Con sesión: menú lateral y transición entre secciones. */}
+        <Route element={<MarcoApp />}>
+          {/* Sección: Casas */}
+          <Route path="/house" element={<PrivateRoute Component={HouseList} />} />
+          <Route path="/house/:id" element={<PrivateRoute Component={HouseFormEdit} />} />
+          <Route path="/create-house" element={<PrivateRoute Component={HouseFormCreate} />} />
 
-        {/* Sección: Chat */}
-        <Route path="/chat" element={<PrivateRoute Component={Chat} />} />
+          {/* Sección: Chat */}
+          <Route path="/chat" element={<PrivateRoute Component={Chat} />} />
 
-        {/* Sección: cuenta */}
-        <Route path="/user/:id" element={<PrivateRoute Component={UserFormEdit} />} />
-        <Route path="/change-password" element={<PrivateRoute Component={ChangePassword} />} />
-        <Route path="/seguridad" element={<PrivateRoute Component={Seguridad} />} />
+          {/* Sección: cuenta */}
+          <Route path="/user/:id" element={<PrivateRoute Component={UserFormEdit} />} />
+          <Route path="/change-password" element={<PrivateRoute Component={ChangePassword} />} />
+          <Route path="/seguridad" element={<PrivateRoute Component={Seguridad} />} />
 
-        {/* Rutas públicas */}
-        <Route path="/create-user" element={<UserFormCreate />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/recuperar" element={<Recuperar />} />
-        <Route path="/restablecer" element={<Restablecer />} />
-        <Route path="/verificacion" element={<Verificacion />} />
+          {/* Rutas públicas */}
+          <Route path="/create-user" element={<UserFormCreate />} />
+
+          {/* Cualquier otra dirección: el 404 propio del proyecto. */}
+          <Route path="*" element={<NoEncontrada />} />
+        </Route>
       </Routes>
-      {!esPortada && <Footer />}
     </>
   );
 }

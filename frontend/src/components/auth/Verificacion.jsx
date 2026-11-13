@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Swal from 'sweetalert2'
@@ -8,10 +8,12 @@ import {
     useMfaRecuperarMutation, useMfaRecuperarVerificarMutation, useMfaVerificarMutation,
 } from "../../features/api/apiSlice";
 import Portada from "./Portada";
+import CampoCodigo from "./CampoCodigo";
+import AnilloCodigo from "./AnilloCodigo";
 
-const CAMPO = "w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 " +
-    "text-gray-900 dark:text-gray-100 px-3.5 py-2.5 text-base focus:outline-none focus:border-emerald-600 " +
-    "focus:ring-4 focus:ring-emerald-600/15";
+const reducir = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const despues = (ms, fn) => setTimeout(fn, reducir() ? 0 : ms);
+
 const BOTON = "w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold py-3";
 const NOMBRES = { totp: "app autenticadora", correo: "código por correo" };
 
@@ -45,16 +47,31 @@ export default function Verificacion() {
     const [error, setError] = useState("");
     const [info, setInfo] = useState("");
     const [ocupado, setOcupado] = useState(false);
+    // Candado sobre el título: se abre con el código correcto y se sacude con uno equivocado.
+    const [candado, setCandado] = useState("normal");
+    const campo = useRef(null);
 
     if (!paso) return <Navigate to="/login" replace />;
     const otro = (paso.activos || []).find((m) => m !== metodo);
 
+    // Código equivocado: las casillas tiemblan y se vacían, el candado se sacude.
+    const fallo = (r) => {
+        setError(mensajeError(r));
+        setCandado("error");
+        campo.current?.fallar();
+        despues(900, () => setCandado("normal"));
+    };
+
     const terminar = (datos) => {
         sessionStorage.removeItem("pasoMfa");
         localStorage.setItem('sessionData', JSON.stringify(datos));
+        setCandado("abierto");
+        // El candado se abre antes de entrar.
+        despues(650, () => {
         dispatch(loginSuccess(datos));
         Swal.fire({ position: "top-end", icon: "success", title: "Bienvenido", showConfirmButton: false, timer: 1500 })
             .then(() => navigate('/house'));
+        });
     };
 
     const elegir = async (elegido) => {
@@ -89,14 +106,15 @@ export default function Verificacion() {
 
     const enviar = async (e) => {
         e.preventDefault();
-        setError(""); setOcupado(true);
+        setError(""); setOcupado(true); setCandado("verificando");
         const codigo = e.target.codigo.value.replace(/\D/g, "");
         let r;
         if (modo === "recuperar") {
             r = await verificarRecuperacion({ pase: paso.pase, codigo });
             setOcupado(false);
-            if (r.error) return setError(mensajeError(r));
-            e.target.reset();
+            if (r.error) return fallo(r);
+            setCandado("normal");
+            campo.current?.limpiar();
             setInfo("");
             setApp(r.data);
             setPaseNuevo(r.data.pase);
@@ -107,7 +125,7 @@ export default function Verificacion() {
         else if (modo === "activar") r = await activar({ pase: paso.pase, metodo, codigo });
         else r = await verificar({ pase: paso.pase, metodo, codigo });
         setOcupado(false);
-        if (r.error) return setError(mensajeError(r));
+        if (r.error) return fallo(r);
         terminar(r.data);
     };
 
@@ -122,7 +140,7 @@ export default function Verificacion() {
             : `Te enviamos un código de 6 dígitos a ${paso.email}. Vence en 10 minutos.`;
 
     return (
-        <Portada paso="Un paso más" titulo="Verificación en dos pasos" subtitulo={subtitulo}>
+        <Portada paso="Un paso más" titulo="Verificación en dos pasos" subtitulo={subtitulo} candado={modo === "elegir" ? undefined : candado}>
             {error && <div role="alert" className="mb-4 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-sm font-semibold px-3.5 py-2.5">{error}</div>}
             {info && <div role="status" className="mb-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-sm font-semibold px-3.5 py-2.5">{info}</div>}
 
@@ -147,7 +165,9 @@ export default function Verificacion() {
                     <form onSubmit={enviar} className="space-y-4">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5" htmlFor="codigo">Código de 6 dígitos</label>
-                            <input type="text" id="codigo" name="codigo" required inputMode="numeric" pattern="[0-9 ]{6,7}" maxLength={7} autoComplete="one-time-code" autoFocus className={CAMPO} />
+                            <CampoCodigo key={`${modo}-${metodo}`} ref={campo} />
+                            <AnilloCodigo key={`anillo-${modo}-${metodo}`}
+                                minutos={modo === "recuperar" ? 15 : metodo === "correo" && modo !== "reconfigurar" ? 10 : undefined} />
                         </div>
                         <button type="submit" disabled={ocupado} className={BOTON}>{modo === "activar" || modo === "reconfigurar" ? "Activar" : "Verificar"}</button>
                     </form>

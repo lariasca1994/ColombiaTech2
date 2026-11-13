@@ -7,6 +7,9 @@
     <link rel="icon" type="image/svg+xml" href="/icono.svg" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Alquiler de vivienda" />
     <meta name="theme-color" content="#047857" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Alquiler de vivienda · Casas y chat en vivo</title>
@@ -20,6 +23,13 @@
             document.documentElement.setAttribute('data-tema', guardado);
           }
         } catch (e) {}
+        // Menú extendido o compacto antes de pintar (en tableta arranca compacto)
+        // y la entrada en cascada solo la primera vez en la sesión.
+        var menu = null;
+        try { menu = localStorage.getItem('colombiatech-menu'); } catch (e) {}
+        if (!menu) { menu = window.innerWidth >= 768 && window.innerWidth <= 1024 ? 'compacto' : 'extendido'; }
+        document.documentElement.setAttribute('data-menu', menu);
+        try { if (!sessionStorage.getItem('ct-menu-visto')) document.documentElement.classList.add('menu-primera'); } catch (e) {}
       })();
     </script>
   </head>

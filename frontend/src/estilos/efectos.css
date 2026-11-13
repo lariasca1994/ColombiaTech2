@@ -1,0 +1,362 @@
+/* Efectos comunes de ColombiaTech2 (Alquiler de vivienda), iguales en web y
+   PWA: transición entre pantallas, botones, menú lateral (extendido y
+   compacto), barra de vidrio del teléfono y hoja "Más". Solo usa los colores
+   de Tailwind que ya usa el proyecto (esmeralda y grises), con theme().
+   Todo se apaga con prefers-reduced-motion. */
+
+:root {
+    --c-fondo: theme('colors.gray.50');
+    --c-superficie: theme('colors.white');
+    --c-texto: theme('colors.gray.900');
+    --c-suave: theme('colors.gray.600');
+    --c-borde: theme('colors.gray.200');
+    --c-acento: theme('colors.emerald.600');
+    --c-acento-fuerte: theme('colors.emerald.700');
+    --c-acento-texto: theme('colors.emerald.700');
+    --c-acento-suave: theme('colors.emerald.50');
+    --c-acento-luz: theme('colors.emerald.500');
+    --curva-suave: cubic-bezier(.2, .8, .2, 1);
+    --curva-rebote: cubic-bezier(.3, 1.25, .5, 1);
+    --curva-menu: cubic-bezier(.3, .9, .3, 1);
+    --menu-ancho: 15rem;
+    --menu-compacto: 4.5rem;
+}
+[data-tema="oscuro"] {
+    --c-fondo: theme('colors.gray.950');
+    --c-superficie: theme('colors.gray.900');
+    --c-texto: theme('colors.gray.100');
+    --c-suave: theme('colors.gray.400');
+    --c-borde: theme('colors.gray.800');
+    --c-acento-texto: theme('colors.emerald.400');
+    --c-acento-suave: color-mix(in srgb, theme('colors.emerald.900') 45%, transparent);
+    --c-acento-luz: theme('colors.emerald.400');
+}
+
+/* ───────────────────────── Transición entre pantallas ───────────────────────── */
+/* La pantalla que sale se desenfoca y se corre; la que entra llega por bloques
+   desde el lado hacia donde se navega (--dir). Lo maneja <Transicion />. */
+.transicion-sale { animation: ct-salir .18s ease-in forwards; pointer-events: none; }
+.transicion-entra > * > * { animation: ct-entrar .5s var(--curva-suave) both; }
+.transicion-entra > * > :nth-child(2) { animation-delay: 45ms; }
+.transicion-entra > * > :nth-child(3) { animation-delay: 90ms; }
+.transicion-entra > * > :nth-child(4) { animation-delay: 135ms; }
+.transicion-entra > * > :nth-child(5) { animation-delay: 180ms; }
+.transicion-entra > * > :nth-child(n+6) { animation-delay: 225ms; }
+.transicion-entra[data-modo="arriba"] > * > * { animation-name: ct-entrar-arriba; }
+.transicion-sale[data-modo="arriba"] { animation-name: ct-salir-arriba; }
+@keyframes ct-salir { to { opacity: 0; transform: translateX(calc(var(--dir, 1) * -18px)); filter: blur(5px); } }
+@keyframes ct-salir-arriba { to { opacity: 0; transform: translateY(calc(var(--dir, 1) * -18px)); filter: blur(5px); } }
+@keyframes ct-entrar { from { opacity: 0; transform: translate(calc(var(--dir, 1) * 22px), 8px); filter: blur(7px); } }
+@keyframes ct-entrar-arriba { from { opacity: 0; transform: translateY(calc(var(--dir, 1) * 22px)); filter: blur(7px); } }
+
+/* ───────────────────────── Botones ───────────────────────── */
+/* Los botones principales (esmeralda) de todo el proyecto: reflejo de luz al
+   pasar el ratón, se hunden al presionar, onda desde el punto del toque
+   (efectos.js), barra de "enviando" mientras están deshabilitados por un envío
+   y temblor cuando aparece un error. */
+button[class*="bg-emerald-6"], button[class*="bg-emerald-5"] {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    min-height: 44px;
+    transition: transform .18s var(--curva-suave), box-shadow .25s ease, filter .2s ease, background-color .25s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+button[class*="bg-emerald-6"]::before, button[class*="bg-emerald-5"]::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -60%;
+    width: 45%;
+    z-index: -1;
+    background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .3), transparent);
+    transform: skewX(-18deg);
+    opacity: 0;
+    pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+    button[class*="bg-emerald-6"]:not(:disabled):hover, button[class*="bg-emerald-5"]:not(:disabled):hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 22px -12px var(--c-acento);
+    }
+    button[class*="bg-emerald-6"]:not(:disabled):hover::before, button[class*="bg-emerald-5"]:not(:disabled):hover::before { animation: ct-reflejo .75s ease; }
+}
+button[class*="bg-emerald-6"]:not(:disabled):active, button[class*="bg-emerald-5"]:not(:disabled):active { transform: scale(.97); transition-duration: .08s; }
+@keyframes ct-reflejo {
+    0% { opacity: 0; transform: skewX(-18deg) translateX(0); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: skewX(-18deg) translateX(420%); }
+}
+/* Enviando: el botón está deshabilitado por el envío y una barra lo recorre. */
+form button[type="submit"][class*="bg-emerald-6"]:disabled::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 35%;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, .9);
+    animation: ct-progreso 1s ease-in-out infinite alternate;
+}
+@keyframes ct-progreso { from { left: 0; } to { left: 65%; } }
+.ct-onda {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--d);
+    height: var(--d);
+    margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+    border-radius: 50%;
+    background: #fff;
+    opacity: .28;
+    transform: scale(0);
+    pointer-events: none;
+    animation: ct-onda .55s ease-out forwards;
+}
+.ct-onda.oscura { background: currentColor; }
+@keyframes ct-onda { to { transform: scale(1); opacity: 0; } }
+.ct-temblor { animation: ct-temblor .42s cubic-bezier(.36, .07, .19, .97) both; }
+@keyframes ct-temblor {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(3px); }
+    30%, 50%, 70% { transform: translateX(-5px); }
+    40%, 60% { transform: translateX(5px); }
+}
+[role="alert"], [role="status"]:not(.mnt) { animation: ct-aviso .35s var(--curva-suave) both; }
+@keyframes ct-aviso { from { opacity: 0; transform: translateY(-6px); } }
+:focus-visible { outline: 2px solid var(--c-acento); outline-offset: 2px; }
+
+/* ───────────────────────── Menú lateral ───────────────────────── */
+.app-con-menu { display: grid; grid-template-columns: var(--menu-ancho) minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; background: var(--c-fondo); }
+html[data-menu="compacto"] .app-con-menu { grid-template-columns: var(--menu-compacto) minmax(0, 1fr); }
+html.menu-listo .app-con-menu { transition: grid-template-columns .4s var(--curva-menu); }
+.zona { display: flex; flex-direction: column; min-width: 0; min-height: 100vh; min-height: 100dvh; }
+.zona-contenido { flex: 1; min-width: 0; overflow-x: clip; }
+.cabecera-movil { display: none; }
+
+.menu {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    padding: 1rem .75rem;
+    background: var(--c-superficie);
+    border-right: 1px solid var(--c-borde);
+    overflow: hidden;
+    z-index: 5;
+}
+.menu-marca { display: flex; align-items: center; gap: .65rem; padding: .25rem .55rem 1.1rem; color: var(--c-texto); font-weight: 700; white-space: nowrap; }
+.menu-marca img { width: 2rem; height: 2rem; flex: none; }
+.menu-nav { position: relative; display: flex; flex-direction: column; gap: .15rem; }
+.menu-op {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    min-height: 44px;
+    padding: .55rem .8rem;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: var(--c-suave);
+    font: inherit;
+    font-size: .95rem;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    z-index: 1;
+    overflow: hidden;
+    transition: color .2s ease;
+}
+.menu-op svg { width: 1.3rem; height: 1.3rem; flex: none; transition: transform .28s var(--curva-rebote); }
+.menu-op[aria-current="page"] { color: var(--c-acento-texto); font-weight: 600; }
+.menu-op[aria-current="page"] svg { transform: scale(1.12); }
+@media (hover: hover) and (pointer: fine) {
+    .menu-op:hover { color: var(--c-texto); }
+    .menu-op:hover svg { transform: translateX(2px); }
+    .menu-op[aria-current="page"]:hover svg { transform: scale(1.12) translateX(2px); }
+}
+.menu-texto { transition: opacity .22s ease, transform .3s var(--curva-menu); transition-delay: calc(var(--k, 0) * 30ms); }
+.texto-corto { display: none; }
+.solo-movil { display: none !important; }
+.menu-hov, .menu-ind { position: absolute; left: 0; top: 0; border-radius: 10px; pointer-events: none; }
+.menu-hov { background: var(--c-acento-suave); opacity: 0; transition: transform .28s cubic-bezier(.3, 1, .4, 1), opacity .25s; }
+.menu-nav:hover .menu-hov.listo { opacity: .6; }
+.menu-ind { overflow: hidden; background: var(--c-acento-suave); transition: transform .32s var(--curva-rebote), width .32s ease, height .32s ease; }
+.menu-ind::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 3px;
+    height: 20px;
+    margin-top: -10px;
+    border-radius: 0 4px 4px 0;
+    background: var(--c-acento-luz);
+    box-shadow: 0 0 12px 2px var(--c-acento-luz);
+}
+.menu-ind::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 84px;
+    background: linear-gradient(to right, color-mix(in srgb, var(--c-acento-luz) 22%, transparent), transparent);
+}
+.menu-sin-anim .menu-ind, .menu-sin-anim .menu-hov { transition: none; }
+html.menu-primera .menu-op, html.menu-primera .menu-marca { animation: ct-entrar-menu .45s var(--curva-suave) both; animation-delay: calc(90ms + var(--k, 0) * 55ms); }
+@keyframes ct-entrar-menu { from { opacity: 0; transform: translateX(-14px); } }
+.menu-pie { margin-top: auto; display: flex; flex-direction: column; gap: .15rem; padding-top: .75rem; border-top: 1px solid var(--c-borde); }
+.menu-usuario { display: flex; align-items: center; gap: .65rem; padding: .4rem .55rem; color: var(--c-texto); font-size: .85rem; white-space: nowrap; min-width: 0; }
+.menu-usuario img, .menu-avatar { flex: none; width: 2.1rem; height: 2.1rem; border-radius: 50%; object-fit: cover; }
+.menu-avatar { display: grid; place-items: center; background: var(--c-acento-suave); color: var(--c-acento-texto); font-weight: 700; }
+.menu-usuario .menu-texto { overflow: hidden; text-overflow: ellipsis; }
+.menu-alternar svg { transition: transform .4s var(--curva-menu); }
+html[data-menu="compacto"] .menu-alternar svg { transform: rotate(180deg); }
+html[data-menu="compacto"] .menu .menu-texto { opacity: 0; transform: translateX(-10px); pointer-events: none; }
+.menu-etiqueta {
+    position: fixed;
+    left: calc(var(--menu-compacto) + .5rem);
+    top: 0;
+    z-index: 30;
+    padding: .35rem .7rem;
+    border-radius: 8px;
+    background: var(--c-texto);
+    color: var(--c-superficie);
+    font-size: .8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity .18s, transform .24s var(--curva-rebote), top .24s cubic-bezier(.3, 1, .4, 1);
+}
+.menu-etiqueta::before { content: ""; position: absolute; left: -4px; top: 50%; width: 8px; height: 8px; margin-top: -4px; transform: rotate(45deg); background: inherit; border-radius: 1px; }
+html[data-menu="compacto"] .menu-etiqueta.visible { opacity: 1; transform: none; }
+
+/* ─────────── Teléfono: barra de vidrio abajo y hoja "Más" ─────────── */
+.hoja-mas { display: none; }
+@media (max-width: 767px) {
+    .app-con-menu, html[data-menu="compacto"] .app-con-menu { display: block; }
+    .cabecera-movil {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: calc(.75rem + env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right)) .75rem max(1rem, env(safe-area-inset-left));
+        background: var(--c-superficie);
+        border-bottom: 1px solid var(--c-borde);
+        color: var(--c-texto);
+        font-weight: 700;
+    }
+    .zona-contenido { padding-bottom: 7rem; }
+    .zona::after {
+        content: "";
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 108px;
+        pointer-events: none;
+        z-index: 4;
+        background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--c-fondo) 92%, transparent) 72%);
+    }
+    .menu {
+        position: fixed;
+        top: auto;
+        left: 12px;
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        height: 62px;
+        flex-direction: row;
+        padding: 0 6px;
+        border: 1px solid color-mix(in srgb, var(--c-texto) 14%, transparent);
+        border-radius: 22px;
+        background: color-mix(in srgb, var(--c-superficie) 80%, transparent);
+        -webkit-backdrop-filter: blur(18px) saturate(1.6);
+        backdrop-filter: blur(18px) saturate(1.6);
+        box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent), 0 14px 30px -8px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .12);
+        z-index: 20;
+        animation: ct-subir-barra .55s .12s cubic-bezier(.2, .9, .3, 1.1) both;
+    }
+    .menu-marca, .menu-pie, .menu-etiqueta, .solo-amplio { display: none !important; }
+    .solo-movil { display: flex !important; }
+    .menu-nav { flex: 1; flex-direction: row; gap: 0; }
+    .menu-op { flex: 1; flex-direction: column; justify-content: center; gap: 3px; height: 100%; min-width: 0; padding: 0 2px; border-radius: 0; font-size: .66rem; text-align: center; transition: color .25s, transform .15s; }
+    .menu-op:active { transform: scale(.94); }
+    .menu-op svg { width: 1.35rem; height: 1.35rem; }
+    .menu-op[aria-current="page"] svg { transform: translateY(-1px); }
+    .menu .menu-texto, html[data-menu="compacto"] .menu .menu-texto { opacity: 1; transform: none; pointer-events: auto; }
+    .texto-largo { display: none; }
+    .texto-corto { display: inline; }
+    .menu-hov { display: none; }
+    .menu-ind { background: transparent; border-radius: 0; overflow: visible; }
+    .menu-ind::before { top: 0; left: 50%; width: 30px; height: 3px; margin: 0 0 0 -15px; border-radius: 0 0 4px 4px; box-shadow: 0 0 14px 2px var(--c-acento-luz); }
+    .menu-ind::after {
+        inset: 0 auto auto 50%;
+        width: 76px;
+        height: 54px;
+        margin-left: -38px;
+        filter: blur(3px);
+        clip-path: polygon(32% 0, 68% 0, 100% 100%, 0 100%);
+        background: linear-gradient(to bottom, color-mix(in srgb, var(--c-acento-luz) 42%, transparent), transparent 85%);
+    }
+    html.menu-primera .menu-op { animation: none; }
+    .hoja-mas {
+        display: block;
+        position: fixed;
+        inset: auto 0 0 0;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 1.25rem max(1rem, env(safe-area-inset-right)) calc(1.25rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left));
+        border: 0;
+        border-radius: 22px 22px 0 0;
+        background: var(--c-superficie);
+        color: var(--c-texto);
+        box-shadow: 0 -18px 40px -12px rgba(0, 0, 0, .35);
+    }
+    .hoja-mas:not([open]) { display: none; }
+    .hoja-mas[open] { animation: ct-hoja-sube .38s cubic-bezier(.2, .9, .3, 1.05) both; }
+    .hoja-mas.cerrando { animation: ct-hoja-baja .22s ease-in both; }
+    .hoja-mas::backdrop { background: rgba(0, 0, 0, .35); }
+    .hoja-mas::before { content: ""; display: block; width: 2.5rem; height: 4px; margin: -.5rem auto 1rem; border-radius: 4px; background: var(--c-borde); }
+    .hoja-mas a, .hoja-mas button {
+        display: flex;
+        align-items: center;
+        gap: .9rem;
+        width: 100%;
+        min-height: 48px;
+        padding: .6rem .5rem;
+        border: 0;
+        border-radius: 10px;
+        background: none;
+        color: var(--c-texto);
+        font: inherit;
+        text-align: left;
+        animation: ct-entrar .4s var(--curva-suave) both;
+        animation-delay: calc(80ms + var(--k, 0) * 50ms);
+    }
+    .hoja-mas a[aria-current="page"] { color: var(--c-acento-texto); font-weight: 600; }
+    .hoja-mas svg { width: 1.3rem; height: 1.3rem; flex: none; }
+}
+@keyframes ct-subir-barra { from { opacity: 0; transform: translateY(80px); } }
+@keyframes ct-hoja-sube { from { transform: translateY(100%); } }
+@keyframes ct-hoja-baja { to { transform: translateY(100%); } }
+
+/* ───────────────────────── Movimiento reducido ───────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-delay: 0s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        transition-delay: 0s !important;
+    }
+}
+
+/* Tablas anchas (lista de casas): se desplazan dentro de su propio marco en
+   vez de cortarse en pantallas angostas. */
+.zona-contenido div:has(> table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 767px) { .zona-contenido div:has(> table) { justify-content: flex-start; padding-inline: 1rem; } }
