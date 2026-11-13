@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import "./App.css";
 import HouseList from "./components/house/HouseList";
@@ -32,12 +33,45 @@ function Inicio() {
   return isAutheticated ? <Navigate to="/house" replace /> : <Login />;
 }
 
+// Rutas de la portada de acceso (el resto va en el marco con menú o cabecera).
+const RUTAS_PORTADA = ["/", "/login", "/recuperar", "/restablecer", "/verificacion"];
+const grupo = (ruta) => (RUTAS_PORTADA.includes(ruta) ? "portada" : "app");
+const reducir = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/** Al pasar entre la portada y el resto (por ejemplo, del login al registro, que
+ *  es una página independiente), la página que sale se desvanece y se corre, y
+ *  la nueva entra desde el lado hacia donde se navega. Dentro de cada grupo,
+ *  la transición la hace <Transicion /> de cada layout. */
+function useTransicionDePagina() {
+  const location = useLocation();
+  const [mostrada, setMostrada] = useState(location);
+  const [fase, setFase] = useState("entra");
+  const [dir, setDir] = useState(1);
+
+  useEffect(() => {
+    if (location.key === mostrada.key) return undefined;
+    if (grupo(location.pathname) === grupo(mostrada.pathname) || reducir()) {
+      setMostrada(location);
+      return undefined;
+    }
+    setDir(grupo(location.pathname) === "app" ? 1 : -1);
+    setFase("sale");
+    const t = setTimeout(() => { setMostrada(location); setFase("entra"); }, 200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
+
+  return { mostrada, fase, dir };
+}
+
 function Marco() {
+  const { mostrada, fase, dir } = useTransicionDePagina();
   return (
     <>
       <InactivityWatcher />
       <Mantenimiento />
-      <Routes>
+      <div key={grupo(mostrada.pathname)} className={fase === "sale" ? "pagina-sale" : "pagina-entra"} style={{ "--dir": dir }}>
+      <Routes location={mostrada}>
         {/* Portada de acceso: el panel de marca queda quieto y solo cambian las tarjetas. */}
         <Route element={<PortadaMarco />}>
           <Route path="/" element={<Inicio />} />
@@ -69,6 +103,7 @@ function Marco() {
           <Route path="*" element={<NoEncontrada />} />
         </Route>
       </Routes>
+      </div>
     </>
   );
 }

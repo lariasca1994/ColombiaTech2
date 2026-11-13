@@ -49,6 +49,13 @@
 @keyframes ct-entrar { from { opacity: 0; transform: translate(calc(var(--dir, 1) * 22px), 8px); filter: blur(7px); } }
 @keyframes ct-entrar-arriba { from { opacity: 0; transform: translateY(calc(var(--dir, 1) * 22px)); filter: blur(7px); } }
 
+/* Entre la portada y el resto de pantallas (por ejemplo, login ↔ registro):
+   la página completa sale y la nueva entra desde el lado hacia donde se navega. */
+.pagina-sale { animation: ct-pagina-sale .2s ease-in forwards; pointer-events: none; }
+.pagina-entra { animation: ct-pagina-entra .55s var(--curva-suave) both; }
+@keyframes ct-pagina-sale { to { opacity: 0; transform: translateX(calc(var(--dir, 1) * -40px)); filter: blur(6px); } }
+@keyframes ct-pagina-entra { from { opacity: 0; transform: translateX(calc(var(--dir, 1) * 48px)); filter: blur(8px); } }
+
 /* ───────────────────────── Botones ───────────────────────── */
 /* Los botones principales (esmeralda) de todo el proyecto: reflejo de luz al
    pasar el ratón, se hunden al presionar, onda desde el punto del toque
