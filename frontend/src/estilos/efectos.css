@@ -365,5 +365,5 @@ html[data-menu="compacto"] .menu-etiqueta.visible { opacity: 1; transform: none;
 
 /* Tablas anchas (lista de casas): se desplazan dentro de su propio marco en
    vez de cortarse en pantallas angostas. */
-.zona-contenido div:has(> table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-@media (max-width: 767px) { .zona-contenido div:has(> table) { justify-content: flex-start; padding-inline: 1rem; } }
+.zona-contenido div:has(> table) { overflow-x: auto; -webkit-overflow-scrolling: touch; justify-content: flex-start; }
+@media (max-width: 767px) { .zona-contenido div:has(> table) { padding-inline: 1rem; } }
