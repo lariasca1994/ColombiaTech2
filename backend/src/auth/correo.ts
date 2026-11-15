@@ -80,7 +80,8 @@ export async function enviarCorreo(
       headers: { 'api-key': clave, 'content-type': 'application/json', accept: 'application/json' },
       body: JSON.stringify({
         sender: { email: remitente, name: nombreRemitente() },
-        to: [{ email: destino, name: nombre }],
+        // Brevo responde 400 si "name" va vacío.
+        to: [nombre && nombre.trim() ? { email: destino, name: nombre.trim() } : { email: destino }],
         subject: asunto,
         textContent: texto,
         htmlContent: documento(asunto, html),
