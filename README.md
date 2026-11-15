@@ -1,4 +1,4 @@
-# ColombiaTech2
+# Alquiler de vivienda (ColombiaTech2)
 
 <p>
   <a href="https://colombia-tech2.vercel.app"><img src="docs/demo-badge.svg" alt="Abrir la demo en vivo" height="32"></a>
@@ -14,276 +14,92 @@
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=white)
 
+> 📘 **[Manual de usuario](docs/MANUAL.md)**: cómo usar cada pantalla, paso a paso y con imágenes.
+
 ## Contenido
 
 1. [Presentación](#1-presentación)
-2. [Estructura del proyecto](#2-estructura-del-proyecto)
+2. [Funcionalidades](#2-funcionalidades)
 3. [Arquitectura](#3-arquitectura)
-4. [Plataformas y su función](#4-plataformas-y-su-función)
-5. [Cómo usar la plataforma](#5-cómo-usar-la-plataforma)
-6. [Instalación para pruebas](#6-instalación-para-pruebas)
-7. [Autor y licencia](#7-autor-y-licencia)
+4. [Estructura del proyecto](#4-estructura-del-proyecto)
+5. [Instalación para pruebas](#5-instalación-para-pruebas)
+6. [Autor y licencia](#6-autor-y-licencia)
 
 ---
 
 ## 1. Presentación
 
-Plataforma de alquiler de vivienda con chat en tiempo real entre interesado y
-arrendador. Backend unificado en NestJS que expone REST, GraphQL y WebSockets
-sobre la misma base de código, con frontend en React.
+Plataforma de alquiler de vivienda en Colombia: quien publica sube los datos y la foto de la casa,
+y quien busca explora el catálogo por departamento y ciudad y conversa en un chat en vivo.
 
-### En pocas palabras
+- **Qué lo hace interesante:** un solo backend atiende tres formas de consumir los mismos datos
+  (REST, GraphQL y WebSockets) sin duplicar lógica.
+- **Cómo probarlo:** entra a la [demo](https://colombia-tech2.vercel.app), crea una cuenta y
+  publica o busca una casa. La primera carga del día puede tardar hasta un minuto mientras el
+  servicio se reactiva.
 
-- **Qué hace:** quien busca vivienda puede ver inmuebles publicados y hablar por
-  chat, en tiempo real, con el arrendador. El arrendador publica sus inmuebles
-  con fotos.
-- **Qué lo hace interesante:** un solo backend atiende tres formas de consumir
-  los mismos datos —REST, GraphQL y WebSockets— sin duplicar lógica.
-- **Cómo probarlo:** entra a la [demo](https://colombia-tech2.vercel.app), crea
-  una cuenta y publica o busca un inmueble. Para correrlo en tu equipo, ve a
-  [Instalación para pruebas](#6-instalación-para-pruebas).
+## 2. Funcionalidades
 
-### Demo en vivo
-
-- **Aplicación:** [colombia-tech2.vercel.app](https://colombia-tech2.vercel.app)
-- **API REST:** `https://colombiatech2-api.onrender.com/api`
-- **GraphQL Playground:** `https://colombiatech2-api.onrender.com/graphql`
-
-> El backend corre en Render, que suspende el servicio tras
-> un período de inactividad. La primera petición tras la suspensión puede
-> tardar entre 30 y 50 segundos en responder mientras el servicio despierta.
-
-### Funcionalidades
-
-- Registro e inicio de sesión con JSON Web Tokens y verificación en dos pasos obligatoria (app
-  autenticadora o código por correo, a elección; el otro se agrega desde **Seguridad**)
-- Bloqueo temporal ante intentos fallidos repetidos y registro de eventos de seguridad (ingresos,
-  intentos fallidos, bloqueos y cambios de contraseña)
-- Publicación y consulta de inmuebles
-- Carga de imágenes (avatares y fotos de inmuebles) con almacenamiento
-  persistente en la nube
-- Acceso restringido: cada usuario solo alcanza su propia información
-- Chat en tiempo real mediante WebSockets
-- Misma información disponible por REST y por GraphQL
-
-### Stack
-
-**Backend:** NestJS, MongoDB con Mongoose, GraphQL (Apollo, enfoque code-first),
-Passport con JWT, Socket.IO
-
-**Frontend:** React 18, Vite, Redux Toolkit, React Router, Tailwind CSS,
-Socket.IO client
-
----
-
-## 2. Estructura del proyecto
-
-```
-ColombiaTech2/
-├── backend/          NestJS — REST, GraphQL y WebSockets
-│   └── src/
-│       ├── auth/     Autenticación JWT y guards
-│       ├── users/
-│       ├── houses/
-│       ├── upload/   Carga de imágenes a Cloudinary
-│       ├── imagenes/ Configuración compartida de Cloudinary
-│       └── messages/ Gateway del chat
-└── frontend/         React + Vite + Redux Toolkit + Tailwind
-    └── src/
-        ├── components/
-        ├── pages/
-        └── store/    Estado global con Redux Toolkit
-```
-
----
+- Registro e ingreso con verificación en dos pasos obligatoria (app autenticadora o código por correo).
+- Catálogo de casas en tarjetas, con búsqueda por ciudad, departamento, tipo o código.
+- Publicación y edición de casas con foto; si no hay foto, se genera una ilustración automática.
+- Chat general en tiempo real.
+- Perfil, cambio de contraseña y métodos de verificación.
+- Diseño adaptable a celular, tablet y computador, tema claro y oscuro, e instalable como aplicación.
+- Pantalla propia de mantenimiento si el servicio no responde, que se recupera sola.
 
 ## 3. Arquitectura
 
 <p align="center">
-  <img src="docs/arquitectura.svg" alt="Diagrama de arquitectura: frontend React en Vercel, backend NestJS en Render con REST, GraphQL y WebSockets, MongoDB Atlas y Cloudinary" width="100%">
+  <img src="docs/arquitectura.svg" alt="Diagrama de arquitectura: aplicación web en React y un backend NestJS que sirve REST, GraphQL y WebSockets sobre los mismos módulos" width="100%">
 </p>
 
-Un único backend NestJS sirve las tres interfaces (REST, GraphQL y
-WebSockets) sobre los mismos módulos de dominio, evitando duplicar lógica de
-negocio entre capas.
-
----
-
-## 4. Plataformas y su función
-
-| Plataforma | Función en el proyecto |
+| Capa | Tecnología |
 |---|---|
-| ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) | Sirve la aplicación React (Vite + Redux Toolkit + Tailwind) y el cliente de chat. |
-| ![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=black) | Corre el backend NestJS: las rutas REST (`/api`), GraphQL (`/graphql`) y el gateway de chat (Socket.IO) llegan a los mismos módulos de dominio, protegidos con JWT. Admite conexiones WebSocket persistentes. |
-| ![MongoDB Atlas](https://img.shields.io/badge/MongoDB_Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white) | Guarda usuarios, inmuebles y mensajes. |
-| ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white) | Almacena las imágenes: avatares de usuario, fotos de inmuebles y las ilustraciones que la plataforma genera para cada inmueble sin foto. |
-| ![API Colombia](https://img.shields.io/badge/API_Colombia-FCD116?style=for-the-badge&logoColor=black) | Catálogo público de departamentos y ciudades para los selectores del formulario de inmuebles (sin registro ni clave). |
+| Aplicación web | React 18, Vite, Redux Toolkit, React Router, Tailwind CSS |
+| Backend | NestJS (REST, GraphQL code-first y WebSockets con Socket.IO) |
+| Datos | MongoDB con Mongoose |
+| Imágenes | Almacenamiento de imágenes en la nube |
+| Despliegue | Frontend y backend se publican solos desde GitHub en cada cambio a `main` |
 
----
+## 4. Estructura del proyecto
 
-## 5. Cómo usar la plataforma
-
-### 5.1 Crear una cuenta
-
-1. Entra a la [demo](https://colombia-tech2.vercel.app) y, en la portada de acceso,
-   elige **Crea una** (debajo de Iniciar sesión).
-2. Completa el formulario:
-
-   | Campo | Dato |
-   |---|---|
-   | Name | Nombre |
-   | Lastname | Apellido |
-   | Email | Correo con el que vas a iniciar sesión |
-   | Password | Contraseña |
-   | Avatar | Foto de perfil (PNG o JPG) |
-
-3. Pulsa **Save**.
-
-### 5.2 Iniciar sesión
-
-1. Elige **Login** en la esquina superior derecha.
-2. Ingresa **Email** y **Password** y pulsa **Iniciar Sesion**.
-3. Escribe el código de 6 dígitos de tu app o de tu correo y pulsa **Verificar**. La primera vez
-   eliges el método (**App autenticadora** o **Código por correo**); en tu avatar → **Seguridad**
-   puedes agregar el otro y elegir cuál se pide por defecto. Si perdiste el teléfono, pulsa
-   **Perdí mi autenticador**.
-4. Al entrar, el menú cambia y muestra las secciones **🏠 Casas** y **💬 Chat**.
-
-La sesión se cierra sola tras 4 horas sin actividad.
-
-### 5.3 Publicar un inmueble
-
-1. En **🏠 Casas**, elige **Crear casa**.
-2. Completa el formulario:
-
-   | Campo | Dato |
-   |---|---|
-   | Address | Dirección |
-   | Department / City | Departamento y ciudad, desde listas desplegables |
-   | Zip code | Código postal |
-   | Size (m2) | Área en metros cuadrados |
-   | Type | Tipo de inmueble (casa, apartamento, etc.) |
-   | Rooms / Bathrooms | Número de habitaciones y baños |
-   | Parking | Sí o No |
-   | Price | Precio |
-   | Code | Código que identifica el inmueble |
-   | Imagen | Foto del inmueble (PNG o JPG). Opcional: si no subes una, la plataforma genera una ilustración del inmueble |
-
-3. Pulsa **Save**.
-
-### 5.4 Consultar, editar o eliminar inmuebles
-
-1. En **🏠 Casas**, elige **Ver casas**: aparece una tabla con los datos y la foto
-   de cada inmueble.
-2. **Edit** abre el mismo formulario con los datos cargados.
-3. **Delete** pide confirmación antes de eliminar el inmueble.
-
-### 5.5 Chatear
-
-1. En el menú lateral (en el teléfono, la barra de abajo), elige **Chat**.
-2. Escribe en **Escribir mensaje...** y pulsa el botón redondo de enviar. Los mensajes llegan en
-   tiempo real.
-
-### 5.6 Perfil, contraseña y tema
-
-- En el menú lateral (en el teléfono, en **Más**) están las opciones de la cuenta:
-  - **Profile:** edita nombre, apellido, correo y avatar.
-  - **Change Password:** pide la contraseña actual y la nueva dos veces.
-  - **Logout:** cierra la sesión.
-- **¿Olvidaste tu contraseña?** (en el login): envía por correo (API de Brevo) un enlace que vence
-  en 30 minutos y sirve una sola vez. Al guardar la contraseña nueva se cierran todas las sesiones
-  abiertas y la verificación en dos pasos sigue activa.
-- **Perdí mi autenticador** (en la pantalla del código): envía un código de 6 dígitos al correo de
-  la cuenta, aunque el método por correo no esté activo; al verificarlo pide configurar la app
-  autenticadora nueva (QR) y la anterior deja de servir.
-- Todos los correos (asunto, encabezado, pie y nombre del remitente) y la entrada de la app
-  autenticadora llevan el nombre del portal, **Alquiler de vivienda**. Las cuentas que ya tenían
-  la app configurada siguen funcionando igual (en la app puede seguir viéndose el nombre anterior
-  hasta que se configure de nuevo).
-- El botón 🌙 / ☀️ alterna entre tema oscuro y claro.
-
-### Si el servicio no responde
-
-Si la API o la base de datos (MongoDB Atlas) no responden, la aplicación muestra una **pantalla de mantenimiento** con los colores del proyecto, en lugar de un error genérico o de una página que no carga.
-
-- **Servidor:** Si MongoDB no está conectado, la API responde **503** al instante (con CORS) en vez de colgarse ~10 s y terminar en 500. Nuevo `GET /health`: 200 solo con la base arriba.
-- **Pantalla:** Un middleware de Redux (`src/features/mantenimiento.js`) detecta fallos de las APIs propias (sin conexión o 502/503/504; la API externa de Colombia no cuenta) y `src/components/Mantenimiento.jsx` muestra la pantalla.
-- **Recuperación:** Consulta `/health` cada 15 s y recarga la página sola cuando la API y la base vuelven. No reintenta acciones del usuario, para no duplicarlas.
-
----
-
-## 6. Instalación para pruebas
-
-### Requisitos
-
-- Node.js 24.22.1 o superior de la serie 24 (parches de seguridad de octubre de 2026)
-- npm
-- Una instancia de MongoDB accesible
-- Una cuenta de Cloudinary para la carga de imágenes
-
-Backend y frontend se levantan por separado, en dos terminales.
-
-### Backend
-
-```bash
-cd backend
-npm install
-cp .env-ejemplo .env
-npm run start:dev
+```
+ColombiaTech2/
+├── backend/          NestJS: REST, GraphQL y WebSockets
+│   └── src/
+│       ├── auth/     Ingreso y verificación en dos pasos
+│       ├── users/
+│       ├── houses/
+│       ├── upload/   Carga de imágenes
+│       └── messages/ Chat
+└── frontend/         React + Vite + Redux Toolkit + Tailwind
+    └── src/
+        ├── components/
+        └── features/ Estado global y consultas
 ```
 
-El `.env` requiere la cadena de conexión a MongoDB, un secreto para firmar los
-tokens y las credenciales de Cloudinary. La plantilla indica el nombre de cada
-variable. Para enviar correos se agregan la clave de Brevo, el correo del remitente y, si se
-quiere, su nombre (vacío usa **Alquiler de vivienda**).
+## 5. Instalación para pruebas
 
-Queda escuchando en `http://localhost:3000`.
-
-- API REST bajo `/api`
-- Consola de GraphQL en `/graphql`
-- WebSocket del chat en la misma raíz
-
-### Frontend
+Requisitos: Node.js 24, npm, una base MongoDB y una cuenta de almacenamiento de imágenes.
 
 ```bash
-cd frontend
-npm install
-cp .env.example .env
-npm run dev
+# Backend (terminal 1)
+cd backend && npm install && cp .env-ejemplo .env && npm run start:dev
+
+# Frontend (terminal 2)
+cd frontend && npm install && cp .env.example .env && npm run dev
 ```
 
-El `.env` necesita la URL del backend. Queda en `http://localhost:5173`.
+Las plantillas `.env-ejemplo` y `.env.example` indican qué variables completar. Nunca subas tu
+`.env` al repositorio. El backend queda en `http://localhost:3000` y el frontend en
+`http://localhost:5173`.
 
-### Despliegue
+## 6. Autor y licencia
 
-El backend está preparado para Render y el frontend para Vercel. Ambos
-requieren definir las mismas variables de entorno del `.env` en el panel del
-proveedor.
+**Luis F. A.** · [GitHub](https://github.com/lariasca1994) · [LinkedIn](https://linkedin.com/in/lfac1)
 
-Los dos se despliegan desde GitHub con cada push a `main`:
-
-- **Frontend:** Vercel está conectado al repo (carpeta `frontend/`) y publica solo.
-- **Backend:** el workflow `.github/workflows/desplegar-backend.yml` pide a Render
-  desplegar el commit cuando cambia `backend/`, espera a que quede activo y
-  comprueba `/health`. Se hace así porque Render no recibe los avisos de push de
-  este repo. Necesita el secreto de repositorio `RENDER_API_KEY`; también se puede
-  lanzar a mano desde la pestaña Actions.
-
-### Imágenes automáticas y depuración
-
-- Cada inmueble sin foto recibe una ilustración generada en el backend (`houses/imagen-casa.ts`):
-  cambia según el tipo, los datos y el código del inmueble, se sube a Cloudinary y se rehace al
-  editarlo. Al arrancar, el backend completa las imágenes de los inmuebles que no tienen.
-- Los inmuebles que crean las pruebas automáticas (código `QA-…`) se borran a los 15 días junto con
-  su imagen, y al eliminar cualquier inmueble se borra su imagen de Cloudinary: nada queda huérfano.
-
----
-
-## 7. Autor y licencia
-
-> 📘 **[Manual de usuario](docs/MANUAL.md)**: cómo usar la plataforma campo por campo, qué datos se ingresan y qué garantiza en seguridad.
-
-**Luis Felipe Arias Carriazo**
-[GitHub](https://github.com/lariasca1994) · [LinkedIn](https://linkedin.com/in/lfac1)
+Contacto: Telegram [@lfac6](https://t.me/lfac6) · WhatsApp [@carraian160](https://wa.me/carraian160) ·
+[ariascluisf@hotmail.com](mailto:ariascluisf@hotmail.com)
 
 Licencia: MIT.

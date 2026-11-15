@@ -1,311 +1,329 @@
-# 📘 Manual de usuario · ColombiaTech2
+# 📘 Manual de usuario · Alquiler de vivienda
 
-Guía para usar la plataforma paso a paso: qué significa cada campo, qué datos se ingresan y qué
-protege la plataforma. Para la parte técnica vuelve al [README](../README.md).
+## 1. Portada
 
-**Demo:** [colombia-tech2.vercel.app](https://colombia-tech2.vercel.app)
+![Portada de Alquiler de vivienda: panel de marca con casas por ciudad y un mensaje de chat](img/manual/01-portada.png)
+
+| | |
+|---|---|
+| **Producto** | Alquiler de vivienda |
+| **Documento** | Manual de usuario |
+| **Versión** | 2.0 · noviembre de 2026 |
+| **Dirigido a** | Personas que buscan vivienda y personas que publican casas en alquiler |
+| **Dirección** | [colombia-tech2.vercel.app](https://colombia-tech2.vercel.app) |
+| **Autor** | Luis F. A. |
 
 ## Contenido
 
-1. [Proyecto: objetivos y alcances](#1-proyecto-objetivos-y-alcances)
-2. [Glosario](#2-glosario)
-3. [Plataformas, base de datos y servicios](#3-plataformas-base-de-datos-y-servicios)
-4. [Paso a paso](#4-paso-a-paso)
-5. [Seguridad: tu información protegida](#5-seguridad-tu-información-protegida)
-6. [Agradecimientos](#6-agradecimientos)
+1. [Portada](#1-portada)
+2. [Introducción](#2-introducción)
+3. [Objetivo](#3-objetivo)
+4. [Alcance](#4-alcance)
+5. [Acceso al sistema](#5-acceso-al-sistema)
+6. [Pantalla principal](#6-pantalla-principal)
+7. [Navegación](#7-navegación)
+8. [Funcionalidades](#8-funcionalidades)
+9. [Gestión de perfil](#9-gestión-de-perfil)
+10. [Mensajes frecuentes](#10-mensajes-frecuentes)
+11. [Preguntas frecuentes](#11-preguntas-frecuentes)
+12. [Glosario](#12-glosario)
 
 ---
 
-## 1. Proyecto: objetivos y alcances
+## 2. Introducción
 
-### Objetivo
+**Alquiler de vivienda** es una plataforma web para publicar y encontrar casas y apartamentos en
+alquiler en Colombia. Quien publica sube los datos y la foto de la vivienda; quien busca explora el
+catálogo por departamento y ciudad y conversa con los demás usuarios en un chat en vivo, sin salir
+de la plataforma.
 
-Plataforma de alquiler de vivienda: los arrendadores publican inmuebles con foto y quienes buscan
-vivienda los consultan y conversan en un chat en tiempo real.
+Funciona en el navegador del computador, la tablet o el celular, y se puede instalar como
+aplicación. Este manual explica, paso a paso y con imágenes, cómo usar cada pantalla.
 
-### Alcance: qué necesitas y qué esperar
+![Cómo funciona Alquiler de vivienda: personas, aplicación, plataforma e información protegida](img/manual/00-como-funciona.svg)
 
-- Solo necesitas un navegador.
-- El servidor se duerme sin uso: la primera acción del día puede tardar **entre 30 y 50 segundos**.
-- Los textos de la interfaz están en inglés (Name, Address, Save…); este manual los traduce.
+## 3. Objetivo
 
-### Límites
+Que cualquier persona pueda, sin conocimientos técnicos:
 
-Es una demo de portafolio:
+- Crear su cuenta e ingresar de forma segura.
+- Publicar, consultar, editar y eliminar casas en alquiler.
+- Conversar en tiempo real con otras personas interesadas.
+- Mantener al día su perfil y su contraseña.
 
-- **El chat es una sala general** y su conexión en tiempo real no exige sesión: no compartas
-  teléfonos, documentos ni datos personales por ese medio.
-- Los inmuebles publicados son visibles para todas las personas con cuenta: publica datos de
-  ejemplo, no tu dirección real.
-- El token se guarda en `localStorage`; cierra sesión con **Logout** en equipos compartidos.
-- El registro no verifica el correo: para recuperar la cuenta con **¿Olvidaste tu contraseña?**,
-  regístrate con un correo al que tengas acceso.
+## 4. Alcance
 
-## 2. Glosario
+**Incluye:** registro e ingreso con verificación en dos pasos, catálogo de casas con búsqueda,
+publicación y edición de casas con foto, chat general en vivo, perfil, cambio de contraseña y
+métodos de verificación.
 
-Palabras técnicas que aparecen en este manual, explicadas en lenguaje simple.
+**No incluye:** pagos, contratos ni visitas agendadas; la plataforma pone en contacto a las
+personas, y el acuerdo de alquiler se hace por fuera.
 
-| Término | Qué significa |
-|---|---|
-| **Administrador** | Cuenta con permisos para gestionar usuarios y configuraciones de la aplicación. |
-| **API** | Puerta de entrada de un programa para que otros programas le pidan o le envíen datos. |
-| **Arranque en frío** | Los servidores gratuitos se apagan sin uso; la primera visita tarda unos segundos mientras vuelven a encenderse. |
-| **Backend** | La parte de la aplicación que trabaja "detrás": procesa lo que envías y habla con la base de datos. |
-| **Base de datos** | Lugar donde la aplicación guarda la información de forma ordenada y permanente. |
-| **Contraseña cifrada (hash)** | La contraseña no se guarda tal cual, sino como una "huella" de la que no se puede recuperar el texto original. |
-| **CORS** | Regla que impide que páginas ajenas usen la API de la aplicación desde el navegador. |
-| **GraphQL** | Forma de consultar una API pidiendo exactamente los datos que se necesitan. |
-| **JWT** | Tipo de token firmado digitalmente: si alguien lo altera, el servidor lo rechaza. |
-| **localStorage** | Espacio del navegador donde la aplicación guarda datos pequeños en tu equipo (por ejemplo, el tema o la sesión). |
-| **Modo mantenimiento** | Pantalla que aparece cuando el servicio o su base de datos no responden; se recupera sola cuando vuelven. |
-| **Navegador** | Programa con el que abres páginas web: Chrome, Edge, Firefox, Safari. |
-| **Nube** | Servidores de una empresa (Amazon, Microsoft, Google, Oracle…) donde la aplicación funciona sin depender de un computador propio. |
-| **REST** | Forma estándar de organizar una API usando direcciones web y métodos como GET o POST. |
-| **Servidor** | Computador en la nube que atiende las peticiones de la aplicación. |
-| **Sesión** | El tiempo en que la aplicación te reconoce después de iniciar sesión, sin pedirte la contraseña de nuevo. |
-| **Tema claro / oscuro** | Combinación de colores de la interfaz; puedes elegir la clara o la oscura. |
-| **Tiempo real (WebSockets / SignalR)** | Conexión abierta que muestra mensajes o cambios al instante, sin recargar la página. |
-| **Token** | Credencial temporal que la aplicación te entrega al iniciar sesión, en lugar de enviar tu contraseña en cada paso. |
-| **Variables de entorno / secretos** | Claves y contraseñas internas de la aplicación, guardadas fuera del código para que no queden expuestas. |
+**Qué necesitas:** un navegador actualizado (Chrome, Edge, Firefox o Safari), conexión a internet,
+un correo propio y una app autenticadora en el celular (por ejemplo, Google Authenticator o
+Microsoft Authenticator) o acceso a tu correo para recibir códigos.
 
-## 3. Plataformas, base de datos y servicios
+**Buenas prácticas:** el chat es una sala general; no compartas teléfonos, documentos ni datos
+personales por ese medio. Publica la dirección general de la vivienda, no datos que te expongan.
 
-Qué servicio de nube, base de datos o API usa el proyecto y para qué sirve cada uno.
+## 5. Acceso al sistema
 
-| Plataforma | Tipo | Qué hace en el proyecto |
-|---|---|---|
-| ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) | Nube | Sirve la aplicación React (Vite + Redux Toolkit + Tailwind) y el cliente de chat. |
-| ![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=black) | Nube | Corre el backend NestJS: las rutas REST (`/api`), GraphQL (`/graphql`) y el gateway de chat (Socket.IO) llegan a los mismos módulos de dominio, protegidos con JWT. Admite conexiones WebSocket persistentes. |
-| ![MongoDB Atlas](https://img.shields.io/badge/MongoDB_Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white) | Base de datos | Guarda usuarios, inmuebles y mensajes. |
-| ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white) | API / servicio externo | Almacena las imágenes: avatares de usuario y fotos de inmuebles. |
-| ![API Colombia](https://img.shields.io/badge/API_Colombia-FCD116?style=for-the-badge&logoColor=black) | API / servicio externo | Catálogo público de departamentos y ciudades para los selectores del formulario de inmuebles (sin registro ni clave). |
+### 5.1 Crear una cuenta
 
-## 4. Paso a paso
-
-### 4.1 Portada
-
-![Portada de Alquiler de vivienda](img/manual/01-portada.png)
-
-La portada de **Alquiler de vivienda** muestra el inicio de sesión. Si aún no tienes cuenta,
-pulsa **Crea una**; si olvidaste la contraseña, **¿Olvidaste tu contraseña?**. El botón 🌙 / ☀️
-cambia el tema.
-
-### 4.2 Crear una cuenta
+En la pantalla de ingreso pulsa **Crea una**.
 
 ![Formulario de registro con sus campos numerados](img/manual/02-registro.png)
 
-| # | Campo | Qué escribir | Reglas |
-|:-:|---|---|---|
-| 1 | Name | Tu nombre | Obligatorio, mínimo 3 letras |
-| 2 | Lastname | Tu apellido | Obligatorio en el formulario |
-| 3 | Email | Correo con el que vas a entrar | Formato válido y único: no puede existir otra cuenta con él |
-| 4 | Password | Tu contraseña | Mínimo **8 caracteres** con mayúscula, minúscula, número y un carácter especial |
-| 5 | Avatar | Foto de perfil (opcional) | PNG o JPG, máximo **5 MB** |
-| 6 | Save | Botón | Crea la cuenta |
-
-### 4.3 Iniciar sesión
-
-![Formulario de inicio de sesión](img/manual/03-login.png)
-
 | # | Campo | Qué escribir |
 |:-:|---|---|
-| 1 | Email | El correo de tu cuenta |
-| 2 | Password | Tu contraseña |
-| 3 | Iniciar Sesion | Pide el código de tu verificación en dos pasos; al escribirlo y pulsar **Verificar** entras y ves los menús **🏠 Casas** y **💬 Chat** |
-| 4 | ¿Olvidaste tu contraseña? | Abre la recuperación por correo (ver más abajo) |
+| 1 | Nombre | Tu nombre |
+| 2 | Apellido | Tu apellido |
+| 3 | Correo | Un correo al que tengas acceso: lo usarás para entrar y para recuperar la cuenta |
+| 4 | Contraseña | Mínimo 8 caracteres, con una mayúscula, una minúscula, un número y un carácter especial (por ejemplo `#` o `!`) |
+| 5 | Foto de perfil | Opcional: una imagen PNG o JPG |
+| 6 | Crear cuenta | Guarda tu cuenta y te lleva al ingreso |
 
-Si el correo o la contraseña no coinciden, el mensaje es el mismo («Credenciales inválidas»), para
-no revelar qué correos están registrados. La sesión se cierra sola tras **4 horas** sin actividad.
+### 5.2 Iniciar sesión
 
-#### Verificación en dos pasos (obligatoria)
-
-Cada ingreso pide, además de la contraseña, un código. La primera vez que ingresas eliges cómo
-recibirlo:
-
-| Método | Cómo funciona |
-|---|---|
-| **App autenticadora** (recomendado) | Escaneas un código QR con Google Authenticator, Microsoft Authenticator u otra app; desde ese momento la app muestra un código nuevo cada 30 segundos, incluso sin internet. Si no puedes escanear, escribe la clave que aparece bajo el QR. En la app la cuenta aparece como **Alquiler de vivienda** (si la configuraste antes con otro nombre, sigue funcionando igual). |
-| **Código por correo** | Cada vez que ingresas te llega un código de 6 dígitos que vence en 10 minutos y sirve una sola vez. |
-
-Confirma el método escribiendo el primer código. Desde tu avatar → **Seguridad** puedes **agregar el
-método que no elegiste** y escoger cuál se pide **por defecto**; tener los dos te permite entrar
-aunque no tengas el teléfono a mano.
-
-#### Perdí mi autenticador
-
-![Pantalla del código con el enlace Perdí mi autenticador](img/manual/08-perdi-autenticador.png)
+![Formulario de inicio de sesión con sus campos numerados](img/manual/03-ingreso.png)
 
 | # | Elemento | Qué hace |
 |:-:|---|---|
-| 1 | Código de 6 dígitos | El código de tu app autenticadora (o del correo, si ese es tu método) |
-| 2 | Perdí mi autenticador | Siempre visible: envía un código de 6 dígitos al correo de tu cuenta, **aunque no hayas activado el código por correo** |
+| 1 | Correo | El correo de tu cuenta |
+| 2 | Contraseña | Tu contraseña |
+| 3 | Iniciar sesión | Comprueba tus datos y pasa a la verificación en dos pasos |
+| 4 | ¿Olvidaste tu contraseña? | Abre la recuperación de contraseña (5.4) |
+| 5 | Crea una | Abre el registro (5.1) |
 
-1. Pulsa **Perdí mi autenticador**: llega un código al correo de tu cuenta. Vence en **15 minutos**
-   y sirve una sola vez; si no llega, usa **Enviar otro código** (hay un límite de envíos).
-2. Escríbelo y pulsa **Verificar**. Con **5 códigos errados** la recuperación queda bloqueada
-   **15 minutos**.
-3. Aparece un código QR nuevo: escanéalo con tu app autenticadora y escribe el código que muestra.
-   Al pulsar **Activar** entras, y la app anterior deja de servir.
+### 5.3 Verificación en dos pasos
 
-#### ¿Olvidaste tu contraseña?
+Cada ingreso pide, además de la contraseña, un código de 6 dígitos. La primera vez eliges cómo
+recibirlo: con una **app autenticadora** (escaneas un código QR y la app muestra un código nuevo
+cada 30 segundos, incluso sin internet) o con un **código por correo**.
 
-1. En el inicio de sesión pulsa **¿Olvidaste tu contraseña?** y escribe el correo de tu cuenta.
-2. La respuesta es la misma exista o no la cuenta. Si existe, llega un correo con el enlace
-   **Crear contraseña nueva**: vence en 30 minutos y sirve una sola vez.
-3. Escribe la nueva contraseña (misma regla del registro) y su confirmación, y vuelve a ingresar.
-   Al guardarla **se cierran todas las sesiones abiertas** (en cualquier equipo) y tu verificación
-   en dos pasos **sigue activa**: al ingresar se te pedirá el código como siempre.
+![Pantalla de verificación en dos pasos con sus elementos numerados](img/manual/04-verificacion.png)
 
-Se pueden pedir como máximo 3 enlaces cada 15 minutos por correo; pedirlos no bloquea el ingreso.
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Código de 6 dígitos | Escribe el código de tu app o del correo; el círculo indica cuánto falta para que la app muestre uno nuevo |
+| 2 | Verificar | Confirma el código y abre la plataforma |
+| 3 | Perdí mi autenticador | Si ya no tienes la app, te envía un código al correo de tu cuenta para configurar una app nueva |
 
-Todos los correos de la plataforma (enlaces y códigos) llegan con el remitente **Alquiler de
-vivienda** y ese nombre en el asunto, el encabezado y el pie.
+**Perdí mi autenticador:** pulsa el enlace, escribe el código que llega a tu correo y escanea el
+nuevo código QR con tu app. La app anterior deja de servir en ese momento.
 
-### 4.4 Ver casas
+### 5.4 Recuperar la contraseña
 
-![Listado de inmuebles publicados](img/manual/04-casas.png)
+![Pantalla para pedir el enlace de recuperación](img/manual/05-recuperar.png)
 
-**🏠 Casas → Ver casas** muestra todos los inmuebles publicados con su dirección, departamento,
-ciudad, área, tipo, precio, código y foto. En **Actions**:
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Correo | El correo de tu cuenta |
+| 2 | Enviar enlace | Envía a ese correo un enlace para crear una contraseña nueva |
 
-- **Edit** abre el formulario con los datos cargados.
-- **Delete** pide confirmación antes de eliminar.
+El mensaje de confirmación es el mismo exista o no la cuenta. Abre el enlace del correo (vence en
+poco tiempo y sirve una sola vez), escribe la contraseña nueva y vuelve a ingresar. Tu verificación
+en dos pasos sigue activa.
 
-Solo el dueño del inmueble (o un administrador) puede editarlo o eliminarlo; si lo intenta otra
-persona, el servidor lo rechaza.
+## 6. Pantalla principal
 
-### 4.5 Publicar un inmueble
+Al ingresar se abre **Casas publicadas**, el catálogo de viviendas.
 
-![Formulario para crear un inmueble con sus campos numerados](img/manual/05-crear-casa.png)
+![Pantalla principal: catálogo de casas con el menú lateral](img/manual/06-pantalla-principal.png)
+
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Menú lateral | Lleva a cada sección (ver 7. Navegación) |
+| 2 | Publicar casa | Abre el formulario para publicar una vivienda (8.1) |
+| 3 | Buscador | Filtra las casas por ciudad, departamento, tipo o código (8.2) |
+| 4 | Tarjeta de casa | Foto, precio, dirección, ciudad, área, habitaciones, baños, parqueadero, código y los botones **Editar** y **Eliminar** |
+
+Si una casa no tiene foto, la plataforma crea una ilustración con su tipo, ciudad, datos y precio.
+
+## 7. Navegación
+
+En el computador y la tablet en horizontal, el menú está a la izquierda. En el celular y la tablet
+en vertical, pasa a una barra inferior; las opciones de la cuenta están en **Más**.
+
+| Menú lateral (computador) | Barra inferior (celular) |
+|:-:|:-:|
+| ![Menú lateral con todas las opciones](img/manual/07-navegacion.png) | ![Barra inferior del celular con Casas, Crear, Chat y Más](img/manual/08-navegacion-movil.png) |
+
+| Opción | Lleva a |
+|---|---|
+| Ver casas | El catálogo (pantalla principal) |
+| Crear casa | El formulario para publicar |
+| Chat | La sala de chat en vivo |
+| Mi perfil | Tus datos personales y tu foto |
+| Cambiar contraseña | El cambio de contraseña |
+| Seguridad | Tus métodos de verificación en dos pasos |
+| Cambiar tema | Alterna entre tema claro y oscuro |
+| Cerrar sesión | Sale de la plataforma |
+| Compactar menú | Deja el menú solo con íconos para ganar espacio |
+
+Al pasar entre secciones, la pantalla cambia con una transición suave. La sesión se cierra sola
+después de un tiempo sin actividad.
+
+## 8. Funcionalidades
+
+### 8.1 Crear: publicar una casa
+
+**Crear casa** (o **Publicar casa** en el catálogo) abre el formulario, dividido en tres partes.
+
+![Formulario para publicar una casa con sus campos numerados](img/manual/09-crear.png)
 
 | # | Campo | Qué escribir |
 |:-:|---|---|
-| 1 | Address | Dirección del inmueble |
-| 2 | Department | Departamento, desde la lista oficial de Colombia |
-| 3 | City | Ciudad del departamento elegido (la lista cambia según el campo 2) |
-| 4 | Zip code | Código postal |
-| 5 | Size (m2) | Área en metros cuadrados |
-| 6 | Type | Tipo: casa, apartamento, apartaestudio… |
-| 7 | Rooms | Número de habitaciones |
-| 8 | Bathrooms | Número de baños |
-| 9 | Parking | Sí o No |
-| 10 | Price | Precio en pesos, sin puntos |
-| 11 | Code | Código que identifica el inmueble (lo usas para buscarlo y editarlo) |
-| 12 | Imagen | Foto del inmueble: PNG o JPG, máximo 5 MB (opcional) |
+| 1 | Dirección | Dirección de la vivienda |
+| 2 | Departamento | Elige de la lista oficial de Colombia |
+| 3 | Ciudad | Se habilita al elegir el departamento y muestra sus ciudades |
+| 4 | Código postal | Código postal de la zona |
+| 5 | Tipo de vivienda | Apartamento, casa, apartaestudio, finca… (puedes escribir otro) |
+| 6 | Área (m²) | Metros cuadrados |
+| 7 | Habitaciones | Número de habitaciones |
+| 8 | Baños | Número de baños |
+| 9 | Parqueadero | Sí o No |
+| 10 | Precio (COP) | Precio en pesos, sin puntos |
+| 11 | Código de la casa | Un código único para identificarla (por ejemplo, `APT-100`) |
+| 12 | Foto | Opcional: PNG o JPG. Sin foto, se genera una ilustración |
+| 13 | Guardar | Publica la casa y vuelve al catálogo |
 
-Pulsa **Save** para publicarlo. Todos los campos de texto y número son obligatorios.
+### 8.2 Consultar: buscar casas y conversar
 
-**Imagen automática:** si no subes una foto, la plataforma crea una ilustración del inmueble con
-su tipo (casa, apartamento, finca o local), ciudad, habitaciones, baños, área, parqueadero, precio
-y código. Si luego editas los datos, la ilustración se actualiza; si subes una foto, la reemplaza.
-Al eliminar el inmueble, su imagen se borra también.
+**Buscar.** Escribe en el buscador una ciudad, un departamento, un tipo o parte del código: el
+catálogo se filtra al instante y a la derecha aparece cuántas casas coinciden.
 
-### 4.6 Chat
+![Búsqueda en el catálogo con una sola casa encontrada](img/manual/10-consultar.png)
 
-![Chat en tiempo real](img/manual/06-chat.png)
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Buscador | Filtra mientras escribes; no distingue tildes ni mayúsculas |
+| 2 | Conteo | Número de casas que coinciden con la búsqueda |
+
+**Conversar.** **Chat** abre la sala general: los mensajes llegan al instante a todas las personas
+conectadas y quedan guardados con su fecha y hora.
+
+![Sala de chat en vivo con el campo para escribir](img/manual/11-chat.png)
+
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Escribir mensaje… | Escribe y pulsa el botón redondo (o Enter) para enviar |
+
+### 8.3 Modificar: editar o eliminar una casa
+
+**Editar.** En la tarjeta de la casa pulsa **Editar**: se abre el formulario con los datos cargados.
+
+![Formulario de edición de una casa con sus elementos numerados](img/manual/12-modificar.png)
+
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Campos de la casa | Cambia lo que necesites (dirección, ubicación, características o precio) |
+| 2 | Código de la casa | No se puede cambiar: identifica la casa |
+| 3 | Cambiar imagen | Reemplaza la foto; si no subes una, la ilustración se actualiza con los datos nuevos |
+| 4 | Guardar cambios | Guarda y vuelve al catálogo |
+
+**Eliminar.** En la tarjeta pulsa **Eliminar**. La plataforma pide confirmación: **Confirmar**
+borra la casa y su imagen; **Cancelar** no hace nada.
+
+![Confirmación para eliminar una casa](img/manual/13-eliminar.png)
+
+Solo quien publicó la casa puede editarla o eliminarla.
+
+### 8.4 Reportar
+
+La plataforma no genera reportes descargables. Para conocer el estado del catálogo usa el
+**conteo de casas** junto al buscador (8.2), que muestra cuántas viviendas hay en total o cuántas
+coinciden con una búsqueda.
+
+Para **reportar un problema** (un error en la plataforma o una publicación indebida) escribe a:
+
+- Telegram: [@lfac6](https://t.me/lfac6)
+- WhatsApp: [@carraian160](https://wa.me/carraian160)
+- Correo: [ariascluisf@hotmail.com](mailto:ariascluisf@hotmail.com)
+
+## 9. Gestión de perfil
+
+### 9.1 Mi perfil
+
+![Formulario de perfil con sus campos numerados](img/manual/14-perfil.png)
+
+| # | Campo | Qué hace |
+|:-:|---|---|
+| 1 | Nombre | Tu nombre, como lo ven los demás en el chat |
+| 2 | Apellido | Tu apellido |
+| 3 | Correo | El correo con el que ingresas |
+| 4 | Foto de perfil | Agrega o cambia tu foto (PNG o JPG) |
+| 5 | Guardar cambios | Guarda los datos |
+
+### 9.2 Cambiar contraseña
+
+![Formulario de cambio de contraseña con sus campos numerados](img/manual/15-clave.png)
 
 | # | Campo | Qué escribir |
 |:-:|---|---|
-| 1 | Escribir mensaje... | Tu mensaje; pulsa el botón redondo de enviar |
+| 1 | Contraseña actual | Tu contraseña de hoy |
+| 2 | Nueva contraseña | Mínimo 8 caracteres, con mayúscula, minúscula, número y carácter especial |
+| 3 | Repite la nueva contraseña | La misma contraseña nueva |
+| 4 | Cambiar contraseña | Guarda el cambio; tus otras sesiones abiertas se cierran |
 
-Es una **sala general**: el mensaje llega al instante a todas las personas que tengan el chat
-abierto y queda guardado con su fecha y hora.
+### 9.3 Seguridad
 
-### 4.7 Cambiar la contraseña
+![Pantalla de seguridad con los métodos de verificación](img/manual/16-seguridad.png)
 
-![Formulario de cambio de contraseña](img/manual/07-cambiar-clave.png)
-
-Desde el menú lateral (en el teléfono, en **Más**) → **Change Password**:
-
-| # | Campo | Qué escribir |
+| # | Método | Qué puedes hacer |
 |:-:|---|---|
-| 1 | Contraseña actual | Tu contraseña actual |
-| 2 | Nueva contraseña | Mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial; distinta de la actual |
-| 3 | Repite la nueva contraseña | La nueva contraseña otra vez |
-| 4 | Cambiar contraseña | Guarda el cambio |
+| 1 | App autenticadora | Ver si está activa y si es el método que se pide por defecto |
+| 2 | Código por correo | **Agregar** el método que te falta o **Pedir este por defecto** |
 
-El servidor comprueba la contraseña actual y guarda solo la huella de la nueva.
+Tener los dos métodos activos te permite entrar aunque no tengas el celular a mano.
 
-En el mismo menú, **Profile** edita nombre, apellido, correo y avatar, y **Logout** cierra la
-sesión.
+## 10. Mensajes frecuentes
 
-### 4.8 Instalar la app en el teléfono o el computador
+| Mensaje | Qué significa | Qué hacer |
+|---|---|---|
+| Datos inválidos: revisa el correo y la contraseña. | El correo o la contraseña no coinciden | Revísalos; si no recuerdas la contraseña, usa **¿Olvidaste tu contraseña?** |
+| Bienvenido | Ingresaste correctamente | Nada: ya estás en el catálogo |
+| Casa Creada Correctamente | La casa quedó publicada | Búscala en el catálogo |
+| La casa no pudo ser registrada | Falta un dato o el código ya existe | Lee el detalle del mensaje, corrige y guarda de nuevo |
+| Casa Actualizada Correctamente | Los cambios quedaron guardados | Nada |
+| Las contraseñas no coinciden | La contraseña nueva y su repetición son distintas | Escríbelas de nuevo |
+| Contraseña actualizada correctamente | El cambio quedó guardado | Usa la contraseña nueva en tu próximo ingreso |
+| El correo no tiene un formato válido | Falta la @ o el dominio | Escribe el correo completo |
+| Estamos en mantenimiento | El servicio no responde en este momento | Espera: la pantalla vuelve sola apenas el servicio responda. No se pierde nada |
+| No encontrada | La dirección escrita no existe | Usa el menú para volver |
 
-Alquiler de vivienda se puede instalar como aplicación (PWA), sin tiendas de aplicaciones:
+## 11. Preguntas frecuentes
 
-1. **Android (Chrome):** abre la [demo](https://colombia-tech2.vercel.app), toca el menú ⋮ y elige
-   **Instalar aplicación** (o **Agregar a la pantalla principal**).
-2. **iPhone (Safari):** toca **Compartir** y elige **Agregar a pantalla de inicio**.
-3. **Computador (Chrome o Edge):** pulsa el ícono de instalar al final de la barra de direcciones.
+**¿Por qué la primera carga del día tarda un poco?** El servicio se suspende cuando nadie lo usa;
+la primera acción puede tardar hasta un minuto mientras se reactiva. Después funciona con normalidad.
 
-La app instalada abre en su propia ventana y, en el teléfono, el menú pasa a una barra abajo (con
-**Más** para las opciones de la cuenta). Necesita internet: sin conexión muestra una pantalla propia
-que se quita sola cuando vuelve la red. En el dispositivo solo se guardan los archivos de la
-aplicación, nunca tus casas, mensajes ni datos de la cuenta.
+**¿Puedo editar la casa de otra persona?** No. Solo quien la publicó puede editarla o eliminarla.
 
-### 4.9 Preguntas frecuentes
+**¿Por qué no me deja registrarme con mi contraseña?** Debe tener 8 caracteres o más, con
+mayúscula, minúscula, número y un carácter especial.
 
-**¿Por qué la primera carga tarda?** El servidor gratuito de Render se suspende sin uso y tarda
-hasta 50 segundos en despertar.
+**Cambié de celular y no tengo la app autenticadora.** Usa **Perdí mi autenticador** en la
+pantalla del código (5.3).
 
-**¿Puedo editar la casa de otra persona?** No. El botón aparece, pero el servidor responde que
-solo el dueño o un administrador puede modificarla.
+**¿Se puede instalar en el celular?** Sí. En Android (Chrome): menú ⋮ → **Instalar aplicación**.
+En iPhone (Safari): **Compartir** → **Agregar a pantalla de inicio**. En el computador (Chrome o
+Edge): el ícono de instalar en la barra de direcciones.
 
-**¿Por qué la contraseña no me deja registrarme?** Revisa que tenga 8 caracteres o más, con
-mayúscula, minúscula, número y un carácter especial (por ejemplo `#` o `!`).
+**¿Dónde pido ayuda?** Telegram [@lfac6](https://t.me/lfac6), WhatsApp
+[@carraian160](https://wa.me/carraian160) o [ariascluisf@hotmail.com](mailto:ariascluisf@hotmail.com).
 
-**¿Qué significa la pantalla "Estamos en mantenimiento"?** El servicio o su base de datos no están respondiendo en ese momento. No se perdió nada: tus casas, mensajes y tu cuenta siguen guardados, y ninguna acción quedó a medias (si no viste la confirmación, no se guardó). La pantalla se actualiza sola y vuelve a la normalidad apenas el servicio responda; también puedes reintentar más tarde.
+## 12. Glosario
 
-## 5. Seguridad: tu información protegida
-
-Tu confianza es lo primero: la plataforma solo pide los datos necesarios para funcionar, los protege y no los comparte con terceros. Esto es lo que se guarda y cómo se protege.
-
-### Qué datos se guardan y dónde
-
-| Dato | Para qué se usa | Dónde se guarda | Quién lo ve |
-|---|---|---|---|
-| Nombre, apellido y correo | Identificar tu cuenta | MongoDB Atlas | Tú y el administrador |
-| Contraseña | Iniciar sesión | MongoDB Atlas, **solo su huella** | Nadie: no se puede leer ni recuperar |
-| Avatar | Foto de perfil | Cloudinary | Quien vea tu perfil |
-| Datos del inmueble y su foto (o la ilustración generada) | Publicar el aviso | MongoDB Atlas y Cloudinary | Todas las personas con sesión |
-| Mensajes del chat | Conversar | MongoDB Atlas | Todas las personas en el chat |
-| Verificación en dos pasos | Confirmar que eres tú al ingresar | MongoDB Atlas: clave de la app **cifrada** y código del correo **solo como huella**; nunca sale en las respuestas de la API | Nadie: no se puede leer desde la base |
-| Sesión (token) | Mantenerte conectado | `localStorage` de tu navegador | Solo tu navegador; vence sola |
-
-### Cómo se protege tu información
-
-Comprobado en el código del proyecto (`backend/src/auth`, `users`, `houses`, `upload`):
-
-- **Contraseñas protegidas con hash.** Las respuestas de la API nunca incluyen la contraseña ni su
-  huella.
-- **Verificación en dos pasos obligatoria** con app autenticadora (TOTP) o código por correo:
-  la clave de la app se guarda cifrada, un código no se acepta dos veces, los intentos errados
-  bloquean temporalmente y el código del correo vence en pocos minutos.
-- **Política de contraseña robusta** en el registro: 8 caracteres o más, con mayúscula, minúscula,
-  número y carácter especial.
-- **Sesión que vence sola**, con cierre automático por inactividad.
-- **Cada quien solo alcanza lo suyo:** solo el dueño (o un administrador) puede editar o borrar un
-  inmueble, ver o modificar una cuenta o cambiar un avatar; el resto recibe un error 403. Esto se
-  aplica igual por REST y por GraphQL.
-- **Cuentas suspendidas** no pueden iniciar sesión, y si ya tenían un token, deja de servir.
-- **Restablecer la contraseña cierra todas las sesiones:** los tokens emitidos antes del cambio
-  dejan de servir y el navegador vuelve al inicio de sesión.
-- **Recuperación del autenticador por correo:** el código vence, tiene límite de envíos e intentos,
-  y la app nueva reemplaza a la anterior solo cuando se activa.
-- **Validación en el servidor** de todos los datos de entrada (la API descarta los campos que no
-  esperaba).
-- **Imágenes controladas:** solo JPG, PNG, GIF o WEBP, con un máximo de 5 MB.
-- **CORS restringido:** la API solo acepta llamadas desde la web oficial.
-- **Secretos fuera del repositorio:** la conexión a MongoDB, la clave JWT y las credenciales de
-  Cloudinary viven en variables de entorno de Render.
-- **Bloqueo temporal** ante intentos fallidos repetidos de contraseña o de código.
-- **Registro de eventos de seguridad:** ingresos, intentos fallidos, bloqueos, cambios de
-  contraseña y recuperaciones del autenticador quedan registrados (nunca contraseñas ni códigos) y se depuran solos.
-- **Al día en seguridad:** el runtime, el sistema y las dependencias se mantienen con los últimos
-  parches y se revisan periódicamente.
-
-## 6. Agradecimientos
-
-A mi familia, por su apoyo incondicional, su paciencia y por creer en cada proyecto incluso cuando apenas era una idea. Este trabajo también es de ustedes.
-
-Y a ti, que usas esta plataforma: cada prueba, comentario y sugerencia ayuda a que siga mejorando.
+| Término | Qué significa |
+|---|---|
+| **App autenticadora** | Aplicación del celular que muestra un código nuevo cada 30 segundos para confirmar que eres tú |
+| **Catálogo** | Lista de casas publicadas en la plataforma |
+| **Código de la casa** | Identificador único que eliges al publicar una casa |
+| **Código QR** | Imagen cuadrada que la app autenticadora escanea para quedar vinculada a tu cuenta |
+| **Ilustración automática** | Imagen que la plataforma crea para una casa publicada sin foto |
+| **Modo mantenimiento** | Pantalla que aparece cuando el servicio no responde; se quita sola |
+| **Sesión** | Tiempo en que la plataforma te reconoce sin pedirte la contraseña otra vez |
+| **Tema claro / oscuro** | Combinación de colores de la pantalla que puedes elegir |
+| **Tiempo real** | Los mensajes aparecen al instante, sin recargar la página |
+| **Verificación en dos pasos** | Además de la contraseña, se pide un código que solo tú puedes recibir |
