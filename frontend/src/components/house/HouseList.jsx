@@ -52,7 +52,7 @@ export default function HouseList() {
                         <label className="cs-buscar">
                             <span className="sr-only">Buscar casas</span>
                             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-                            <input type="search" className="pg-entrada" placeholder="Buscar por ciudad, departamento, tipo o código"
+                            <input type="search" className="pg-entrada" placeholder="Ciudad, departamento o código"
                                 value={buscar} onChange={(e) => setBuscar(e.target.value)} />
                         </label>
                         <span className="cs-conteo" aria-live="polite">

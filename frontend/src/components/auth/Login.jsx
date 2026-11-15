@@ -3,7 +3,7 @@ import { useLoginMutation } from "../../features/api/apiSlice";
 import { Link, useNavigate } from 'react-router-dom'
 import Portada from "./Portada";
 
-// Los textos "Email", "Password", "Iniciar Sesion" y "Datos Invalidos" los
+// Los textos "Correo", "Contraseña", "Iniciar sesión" y "Datos inválidos" los
 // usa la prueba E2E de qa-evidencia: cambiarlos rompe esa prueba.
 const CAMPO = "w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 " +
     "text-gray-900 dark:text-gray-100 px-3.5 py-2.5 text-base focus:outline-none focus:border-emerald-600 " +
@@ -44,19 +44,19 @@ export default function Login() {
         >
             {error && (
                 <div role="alert" className="mb-4 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-sm font-semibold px-3.5 py-2.5">
-                    Datos Invalidos
+                    Datos inválidos: revisa el correo y la contraseña.
                 </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5" htmlFor="email">Correo</label>
-                    <input type="email" id="email" required name="email" placeholder="Email" autoComplete="username" className={CAMPO} />
+                    <input type="email" id="email" required name="email" placeholder="tu@correo.com" autoComplete="username" className={CAMPO} />
                 </div>
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5" htmlFor="password">Contraseña</label>
-                    <input type="password" id="password" required minLength="3" name="password" placeholder="Password" autoComplete="current-password" className={CAMPO} />
+                    <input type="password" id="password" required minLength="3" name="password" placeholder="Tu contraseña" autoComplete="current-password" className={CAMPO} />
                 </div>
-                <button type="submit" className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3">Iniciar Sesion</button>
+                <button type="submit" className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3">Iniciar sesión</button>
             </form>
             <p className="mt-4 text-center text-sm">
                 <Link to="/recuperar" className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">¿Olvidaste tu contraseña?</Link>
