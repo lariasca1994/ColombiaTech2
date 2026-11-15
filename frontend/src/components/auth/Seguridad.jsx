@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { CabeceraPagina } from "../ui/Pagina";
 import { useGetMfaQuery, useMfaAgregarActivarMutation, useMfaAgregarMutation, useMfaPreferidoMutation } from "../../features/api/apiSlice";
 
 const NOMBRES = { totp: "App autenticadora", correo: "Código por correo" };
@@ -47,17 +48,17 @@ export default function Seguridad() {
     };
 
     return (
-        <div className="max-w-lg w-full mx-auto px-5 py-5">
-            <section className="shadow-md rounded pt-6 pb-8 mb-4 px-8 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 space-y-4">
-                <h1 className="text-xl font-bold">Verificación en dos pasos</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Cada ingreso pide, además de la contraseña, un código de uno de tus métodos.</p>
+        <div className="pg pg--angosta">
+            <CabeceraPagina antetitulo="Cuenta" titulo="Seguridad" descripcion="Cada ingreso pide, además de la contraseña, un código de uno de tus métodos." />
+            <section className="pg-tarjeta space-y-4">
+                <h2 className="text-lg font-bold">Verificación en dos pasos</h2>
                 {error && <div role="alert" className="rounded bg-rose-50 dark:bg-rose-950/40 text-red-600 dark:text-red-400 text-sm font-semibold px-3 py-2">{error}</div>}
                 {exito && <div role="status" className="rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-sm font-semibold px-3 py-2">{exito}</div>}
                 <ul className="space-y-3">
                     {Object.entries(NOMBRES).map(([clave, nombre]) => {
                         const activo = estado?.activos?.includes(clave);
                         return (
-                            <li key={clave} className="flex flex-wrap items-center justify-between gap-3 rounded border border-gray-200 dark:border-gray-700 px-4 py-3">
+                            <li key={clave} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3">
                                 <div>
                                     <p className="font-semibold">{nombre}</p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">{activo ? `Activa${clave === estado?.preferido ? " · se pide por defecto" : ""}` : "Sin configurar"}</p>

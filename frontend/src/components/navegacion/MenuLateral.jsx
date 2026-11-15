@@ -37,8 +37,8 @@ export default function MenuLateral() {
         { to: '/house', icono: 'casas', largo: 'Ver casas', corto: 'Casas', activa: pathname === '/house' || pathname.startsWith('/house/') },
         { to: '/create-house', icono: 'nueva', largo: 'Crear casa', corto: 'Crear', activa: pathname === '/create-house' },
         { to: '/chat', icono: 'chat', largo: 'Chat', corto: 'Chat', activa: pathname === '/chat' },
-        { to: `/user/${user?._id}`, icono: 'perfil', largo: 'Profile', corto: 'Profile', activa: pathname.startsWith('/user/'), soloAmplio: true },
-        { to: '/change-password', icono: 'clave', largo: 'Change Password', corto: 'Clave', activa: pathname === '/change-password', soloAmplio: true },
+        { to: `/user/${user?._id}`, icono: 'perfil', largo: 'Mi perfil', corto: 'Perfil', activa: pathname.startsWith('/user/'), soloAmplio: true },
+        { to: '/change-password', icono: 'clave', largo: 'Cambiar contraseña', corto: 'Clave', activa: pathname === '/change-password', soloAmplio: true },
         { to: '/seguridad', icono: 'escudo', largo: 'Seguridad', corto: 'Seguridad', activa: pathname === '/seguridad', soloAmplio: true },
     ]
     const enMas = opciones.some((o) => o.soloAmplio && o.activa)
@@ -169,7 +169,7 @@ export default function MenuLateral() {
                         <Icono nombre="tema" /><span className="menu-texto"><span className="texto-largo">Cambiar tema</span></span>
                     </button>
                     <button type="button" className="menu-op" style={{ '--k': 2 }} onClick={salir}>
-                        <Icono nombre="salir" /><span className="menu-texto"><span className="texto-largo">Logout</span></span>
+                        <Icono nombre="salir" /><span className="menu-texto"><span className="texto-largo">Cerrar sesión</span></span>
                     </button>
                     <button type="button" className="menu-op menu-alternar" style={{ '--k': 3 }} onClick={alternarMenu}
                         aria-expanded={!compacto} aria-label="Compactar o extender el menú">
@@ -187,7 +187,7 @@ export default function MenuLateral() {
                     </Link>
                 ))}
                 <button type="button" style={{ '--k': 3 }} onClick={() => { hoja.current?.close(); salir() }}>
-                    <Icono nombre="salir" />Logout
+                    <Icono nombre="salir" />Cerrar sesión
                 </button>
             </dialog>
         </>

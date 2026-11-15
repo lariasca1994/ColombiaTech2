@@ -1,13 +1,8 @@
-
+/** Pie de las pantallas internas: nombre del producto, sin datos personales. */
 export default function Footer() {
-
-  return (
-      <div className="bg-gray-800 text-white py-4 flex justify-center ...">
-          <div>
-              <h1>Proyecto React</h1>
-              <h2>Proyecto Luis Felipe Arias</h2>
-          </div>
-
-      </div>
-  );
+    return (
+        <footer className="pie-app">
+            Alquiler de vivienda · Casas por departamento y ciudad, con chat en vivo
+        </footer>
+    );
 }

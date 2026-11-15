@@ -1,125 +1,121 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLazyGetCitiesByDepartmentQuery, useGetDepartmentsQuery } from "../../features/api/apiColombiaSlice";
+import { AvisoError, CabeceraPagina, Campo, Cargando, Tarjeta, ZonaImagen } from "../ui/Pagina";
 
-/** Componente reutilizable para Crear y Actualizar un Usuario */
-export default function HouseForm({props}){
-    const { handleSubmit, handleChangeAvatar, house } = props
+/** Formulario de casa, el mismo para publicar y para editar.
+ *  Los name de los campos se conservan: los usan las pruebas E2E. */
+export default function HouseForm({ props }) {
+    const { handleSubmit, handleChangeAvatar, house } = props;
+    const editando = Boolean(house);
 
-    const { data: departments, isLoading, isError, error } = useGetDepartmentsQuery();
-    const [selectedDepartment, setSelectedDepartment] = useState(5)
-
+    const { data: departments, isLoading, isError } = useGetDepartmentsQuery();
     const [getCities] = useLazyGetCitiesByDepartmentQuery();
-    const [cities, setCities] = useState([])
+    const [cities, setCities] = useState([]);
+    const [cargandoCiudades, setCargandoCiudades] = useState(false);
 
-    const handleChangeDepartment = async (e) => {
-        setCities([]) // Limpio la lista de ciudades
-        setSelectedDepartment(e.target.value)
-        if(e.target.value){
-            const response = await getCities(e.target.value.split("-")[0])
-            setCities(response.data) // Lleno la lista de ciudades
-        }
-    }
+    const cargarCiudades = async (valor) => {
+        setCities([]);
+        if (!valor) return;
+        setCargandoCiudades(true);
+        const response = await getCities(valor.split("-")[0]);
+        setCities(response.data || []);
+        setCargandoCiudades(false);
+    };
 
-    if (isLoading) return <div role="status" className='flex justify-center'>
-        <svg aria-hidden="true" className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-        </svg>
-        <span className="sr-only">Loading...</span>
-    </div>;
-    else if(isError) return (<div>Error: {error.message} </div>)
+    // Al editar, el departamento guardado es solo el nombre: se busca su id para cargar las ciudades.
+    const deptoGuardado = editando && departments ? departments.find((d) => d.name === house.state) : null;
+    const valorDepto = deptoGuardado ? `${deptoGuardado.id}-${deptoGuardado.name}` : "";
+    useEffect(() => { if (valorDepto) cargarCiudades(valorDepto); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [valorDepto]);
+
+    if (isLoading) return <div className="pg"><Cargando texto="Cargando el formulario…" /></div>;
 
     return (
-        <div className="max-w-md w-full mx-auto px-5 py-5">
-            <form onSubmit={handleSubmit} className="shadow-md rounded pt-6 pb-10 mb-4 px-10 bg-white dark:bg-gray-800">
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Addres</label>
-                    <input type="text" required name="address" placeholder="Address" defaultValue={house?.address}
-                            className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Department</label>
-                    <select name="state" required
-                            onChange={handleChangeDepartment}
-                            defaultValue={house?.state}
-                            className="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer">
-                        <option value="">Seleccionar un Departmento</option>
-                        {departments.map(department => (
-                            <option key={department.id} value={`${department.id}-${department.name}`}
-                            >{department.name}</option>
-                        ))}
-                    </select>
-                </div>
-                {cities.length == 0 ? null : (<div>
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">City</label>
-                    <select name="city" required
-                        defaultValue={house?.city}
-                        className="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer">
-                        <option value="">Seleccione la ciudad</option>
-                    {cities.map(city => (
-                        <option key={city.id} value={city.name}>{city.name}</option>
-                    ))}
-                    </select>
-                </div>)}
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Zip code</label>
-                    <input type="text" required name="zip_code" placeholder="Zip code" defaultValue={house?.zip_code}
-                    className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Size (m2)</label>
-                    <input type="number" step="any" required name="size" placeholder="Size" defaultValue={house?.size}
-                    className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Type</label>
-                    <input type="text" required name="type" placeholder="Type" defaultValue={house?.type}
-                    className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Rooms</label>
-                    <input type="number" required name="rooms" placeholder="Rooms" defaultValue={house?.rooms}
-                    className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Bathrooms</label>
-                    <input type="number" required name="bathrooms" placeholder="Bathrooms" defaultValue={house?.bathrooms}
-                    className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Parking</label>
-                    <select name="parking" required defaultValue={house?.parking}
-                        className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600">
-                        <option value="">Seleccione</option>
-                        <option value="Si">Sí</option>
-                        <option value="No">No</option>
-                    </select>
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Price</label>
-                    <input type="number" step="any" required name="price" placeholder="Price" defaultValue={house?.price}
-                    className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Code</label>
-                    <input type="text" required name="code" placeholder="Code" defaultValue={house?.code}
-                    className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                <div className="flex items-center justify-center w-full">
-                    <label htmlFor="image" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                <path stroke="currentColor" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                            </svg>
-                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+        <div className="pg pg--angosta">
+            <CabeceraPagina antetitulo="Casas" titulo={editando ? `Editar casa ${house.code}` : "Publicar una casa"}
+                descripcion={editando ? "Actualiza los datos y guarda los cambios." : "Completa los datos de la vivienda. Los campos se validan antes de guardar."} />
+            {isError && <AvisoError>No se pudo cargar la lista de departamentos. Intenta de nuevo en un momento.</AvisoError>}
+
+            <form onSubmit={handleSubmit}>
+                <Tarjeta titulo="Ubicación" descripcion="Dirección, departamento y ciudad donde está la vivienda.">
+                    <div className="pg-rejilla">
+                        <Campo id="address" etiqueta="Dirección" ancho="completo">
+                            <input id="address" type="text" required name="address" placeholder="Ej.: Calle 100 # 15-20"
+                                defaultValue={house?.address} className="pg-entrada" autoComplete="street-address" />
+                        </Campo>
+                        <Campo id="state" etiqueta="Departamento">
+                            <select id="state" name="state" required key={valorDepto} defaultValue={valorDepto}
+                                onChange={(e) => cargarCiudades(e.target.value)} className="pg-entrada">
+                                <option value="">Selecciona un departamento</option>
+                                {(departments || []).map((d) => (
+                                    <option key={d.id} value={`${d.id}-${d.name}`}>{d.name}</option>
+                                ))}
+                            </select>
+                        </Campo>
+                        <Campo id="city" etiqueta="Ciudad" ayuda={cargandoCiudades ? "Cargando ciudades…" : cities.length ? null : "Primero elige el departamento."}>
+                            <select id="city" name="city" required key={`${valorDepto}-${cities.length}`} defaultValue={house?.city || ""}
+                                disabled={!cities.length} className="pg-entrada">
+                                <option value="">Selecciona la ciudad</option>
+                                {cities.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+                            </select>
+                        </Campo>
+                        <Campo id="zip_code" etiqueta="Código postal">
+                            <input id="zip_code" type="text" required name="zip_code" inputMode="numeric" placeholder="Ej.: 110111"
+                                defaultValue={house?.zip_code} className="pg-entrada" autoComplete="postal-code" />
+                        </Campo>
+                    </div>
+                </Tarjeta>
+
+                <Tarjeta titulo="Características" descripcion="Tamaño, tipo y distribución.">
+                    <div className="pg-rejilla">
+                        <Campo id="type" etiqueta="Tipo de vivienda">
+                            <input id="type" type="text" required name="type" placeholder="Ej.: Apartamento" list="tipos-vivienda"
+                                defaultValue={house?.type} className="pg-entrada" />
+                            <datalist id="tipos-vivienda">
+                                <option value="Apartamento" /><option value="Casa" /><option value="Apartaestudio" /><option value="Finca" />
+                            </datalist>
+                        </Campo>
+                        <Campo id="size" etiqueta="Área (m²)">
+                            <input id="size" type="number" step="any" min="1" required name="size" placeholder="Ej.: 80"
+                                defaultValue={house?.size} className="pg-entrada" />
+                        </Campo>
+                        <Campo id="rooms" etiqueta="Habitaciones">
+                            <input id="rooms" type="number" min="0" required name="rooms" placeholder="Ej.: 3"
+                                defaultValue={house?.rooms} className="pg-entrada" />
+                        </Campo>
+                        <Campo id="bathrooms" etiqueta="Baños">
+                            <input id="bathrooms" type="number" min="0" required name="bathrooms" placeholder="Ej.: 2"
+                                defaultValue={house?.bathrooms} className="pg-entrada" />
+                        </Campo>
+                        <Campo id="parking" etiqueta="Parqueadero">
+                            <select id="parking" name="parking" required defaultValue={house?.parking || ""} className="pg-entrada">
+                                <option value="">Selecciona</option>
+                                <option value="Si">Sí</option>
+                                <option value="No">No</option>
+                            </select>
+                        </Campo>
+                    </div>
+                </Tarjeta>
+
+                <Tarjeta titulo="Precio, código y foto">
+                    <div className="pg-rejilla">
+                        <Campo id="price" etiqueta="Precio (COP)">
+                            <input id="price" type="number" step="any" min="0" required name="price" placeholder="Ej.: 250000000"
+                                defaultValue={house?.price} className="pg-entrada" />
+                        </Campo>
+                        <Campo id="code" etiqueta="Código de la casa" ayuda={editando ? "El código no se puede cambiar." : "Identifica la casa; debe ser único."}>
+                            <input id="code" type="text" required name="code" placeholder="Ej.: APT-100"
+                                defaultValue={house?.code} readOnly={editando} className="pg-entrada" />
+                        </Campo>
+                        <div className="pg-campo pg-campo--completo">
+                            <ZonaImagen id="image" nombre="image" etiqueta="Agregar foto de la casa" imagenActual={house?.image} onChange={handleChangeAvatar} />
                         </div>
-                        <input id="image" name="image" accept="image/png, image/jpeg" type="file" className="hidden" onChange={handleChangeAvatar} />
-                    </label>
-                </div>
-                <div className="flex justify-center">
-                    <button className="bg-emerald-600 hover:bg-emerald-700 rounded text-white font-bold py-2 px-4">Save</button>
-                </div>
+                    </div>
+                    <div className="pg-pie-form">
+                        <button type="submit" className="pg-boton bg-emerald-600 hover:bg-emerald-700 text-white">
+                            {editando ? "Guardar cambios" : "Guardar"}
+                        </button>
+                    </div>
+                </Tarjeta>
             </form>
         </div>
     );

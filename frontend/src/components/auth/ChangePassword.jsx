@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useCambiarContrasenaMutation } from "../../features/api/apiSlice";
 import Swal from 'sweetalert2'
 
-const CAMPO = "shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 " +
-    "text-gray-900 dark:text-gray-100 dark:border-gray-600";
+import { AvisoError, CabeceraPagina, Campo, Tarjeta } from "../ui/Pagina";
 
 // El backend verifica la contraseña actual y guarda la nueva con bcrypt
 // (POST /auth/cambiar-contrasena).
@@ -39,35 +38,33 @@ export default function ChangePassword() {
     }
 
     return (
-        <div className="max-w-lg w-full mx-auto px-5 py-5">
-            <form onSubmit={handleSubmit} className="shadow-md rounded pt-6 pb-10 mb-4 px-10 bg-white dark:bg-gray-800">
-                {error ?
-                    <div role="alert" className="mb-4 rounded bg-rose-50 dark:bg-rose-950/40 text-red-600 dark:text-red-400 text-sm font-semibold px-3 py-2">{error}</div>
-                    : null}
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2" htmlFor="password">Contraseña actual</label>
-                    <input type="password" id="password" required name="password" autoComplete="current-password" className={CAMPO} />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2" htmlFor="new-password">Nueva contraseña</label>
-                    <input type="password" id="new-password" required minLength="8" name="new-password" autoComplete="new-password"
-                        className={CAMPO} onChange={(e) => setNewPassword(e.target.value)} />
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Mínimo 8 caracteres, con una mayúscula, una minúscula, un número y un carácter especial.</span>
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2" htmlFor="repeat-new-password">Repite la nueva contraseña</label>
-                    <input type="password" id="repeat-new-password" required minLength="8" name="repeat-new-password" autoComplete="new-password"
-                        className={CAMPO} onChange={(e) => setNotEqualPassword(newPassword !== e.target.value)} />
-                    {notEqualPassword ?
-                        <span className="text-red-600 dark:text-red-400">Las contraseñas no coinciden</span>
-                        : null}
-                </div>
-                <div className="flex justify-center">
-                    <button type="submit" disabled={isLoading}
-                        className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 rounded text-white font-bold py-2 px-4">
-                        Cambiar contraseña
-                    </button>
-                </div>
+        <div className="pg pg--angosta">
+            <CabeceraPagina antetitulo="Cuenta" titulo="Cambiar contraseña"
+                descripcion="Escribe tu contraseña actual y la nueva. Al cambiarla, tus otras sesiones abiertas se cierran." />
+            <form onSubmit={handleSubmit}>
+                <Tarjeta>
+                    {error ? <AvisoError>{error}</AvisoError> : null}
+                    <div className="pg-rejilla">
+                        <Campo id="password" etiqueta="Contraseña actual" ancho="completo">
+                            <input type="password" id="password" required name="password" autoComplete="current-password" className="pg-entrada" />
+                        </Campo>
+                        <Campo id="new-password" etiqueta="Nueva contraseña"
+                            ayuda="Mínimo 8 caracteres, con una mayúscula, una minúscula, un número y un carácter especial.">
+                            <input type="password" id="new-password" required minLength="8" name="new-password" autoComplete="new-password"
+                                className="pg-entrada" onChange={(e) => setNewPassword(e.target.value)} />
+                        </Campo>
+                        <Campo id="repeat-new-password" etiqueta="Repite la nueva contraseña"
+                            ayuda={notEqualPassword ? <span className="text-red-600 dark:text-red-400 font-semibold">Las contraseñas no coinciden</span> : null}>
+                            <input type="password" id="repeat-new-password" required minLength="8" name="repeat-new-password" autoComplete="new-password"
+                                className="pg-entrada" onChange={(e) => setNotEqualPassword(newPassword !== e.target.value)} />
+                        </Campo>
+                    </div>
+                    <div className="pg-pie-form">
+                        <button type="submit" disabled={isLoading} className="pg-boton bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white">
+                            Cambiar contraseña
+                        </button>
+                    </div>
+                </Tarjeta>
             </form>
         </div>
     );

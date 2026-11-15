@@ -34,7 +34,7 @@ function Inicio() {
 }
 
 // Rutas de la portada de acceso (el resto va en el marco con menú o cabecera).
-const RUTAS_PORTADA = ["/", "/login", "/recuperar", "/restablecer", "/verificacion"];
+const RUTAS_PORTADA = ["/", "/login", "/create-user", "/recuperar", "/restablecer", "/verificacion"];
 const grupo = (ruta) => (RUTAS_PORTADA.includes(ruta) ? "portada" : "app");
 const reducir = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -76,6 +76,7 @@ function Marco() {
         <Route element={<PortadaMarco />}>
           <Route path="/" element={<Inicio />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/create-user" element={<UserFormCreate />} />
           <Route path="/recuperar" element={<Recuperar />} />
           <Route path="/restablecer" element={<Restablecer />} />
           <Route path="/verificacion" element={<Verificacion />} />
@@ -95,9 +96,6 @@ function Marco() {
           <Route path="/user/:id" element={<PrivateRoute Component={UserFormEdit} />} />
           <Route path="/change-password" element={<PrivateRoute Component={ChangePassword} />} />
           <Route path="/seguridad" element={<PrivateRoute Component={Seguridad} />} />
-
-          {/* Rutas públicas */}
-          <Route path="/create-user" element={<UserFormCreate />} />
 
           {/* Cualquier otra dirección: el 404 propio del proyecto. */}
           <Route path="*" element={<NoEncontrada />} />

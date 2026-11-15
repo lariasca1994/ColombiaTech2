@@ -33,7 +33,7 @@ export default function Header() {
           </li>
           <li>
             <Link to="/create-user" className="hover:text-emerald-400">
-              Crear Usuario
+              Crear cuenta
             </Link>
           </li>
         </ul>
@@ -98,13 +98,13 @@ export default function Header() {
                     to={`/user/${user._id}`}
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    Profile
+                    Mi perfil
                   </Link>
                   <Link
                     to="/change-password"
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    Change Password
+                    Cambiar contraseña
                   </Link>
                   <Link
                     to="/seguridad"
@@ -116,7 +116,7 @@ export default function Header() {
                     onClick={handleLogout}
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                   >
-                    Logout
+                    Cerrar sesión
                   </a>
                 </div>
               )}

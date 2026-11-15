@@ -4,7 +4,6 @@ import { createSlice } from "@reduxjs/toolkit"
 const houses =[
 {
 "id":"212513121",
-"id":45326262,
 "name":"Mario",
 "lastname":"Perez",
 "email":"mario@correo.com",

@@ -7,7 +7,7 @@ const numberSlice = createSlice({
         value: 0
     },
     reducers: {
-        increaseNumber: (state, action) => {
+        increaseNumber: (state) => {
             state.value += 1;
         },
         decreaseNumber: (state) => {

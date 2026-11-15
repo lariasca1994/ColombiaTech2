@@ -8,6 +8,7 @@ export default function UserFormCreate(){
 
     const navigate = useNavigate();
     const [file, setFile] = useState(null);
+    const [enviando, setEnviando] = useState(false);
     const [createUser] = useCreateUserMutation()
     const [uploadAvatar] = useUploadAvatarMutation();
 
@@ -23,6 +24,7 @@ export default function UserFormCreate(){
             email: e.target.email.value,
             password: e.target.password.value,
         }
+        setEnviando(true)
         try {
             const response = await createUser(newUser)
             if (response.error) {
@@ -48,16 +50,18 @@ export default function UserFormCreate(){
                     showConfirmButton: false,
                     timer: 1500
                 }).then(() => {
-                    navigate('/')
+                    navigate('/login')
                 });
             }
         } catch (error) {
             console.log(error)
+        } finally {
+            setEnviando(false)
         }
 
     }
 
     return (
-        <UserForm props={{ handleChangeAvatar:handleChangeAvatar,   handleSubmit: handleSubmit, user:null}} />
+        <UserForm props={{ handleChangeAvatar:handleChangeAvatar,   handleSubmit: handleSubmit, user:null, enviando}} />
     );
 }

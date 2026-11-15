@@ -1,46 +1,73 @@
-/** Componente reutilizable para Crear y Actualizar un Usuario */
-export default function UserForm({props}){
-    const { handleSubmit, handleChangeAvatar, user } = props
+import { Link } from "react-router-dom";
+import Portada from "../auth/Portada";
+import { CabeceraPagina, Campo, Tarjeta, ZonaImagen } from "../ui/Pagina";
+
+const CAMPO_PORTADA = "w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 " +
+    "text-gray-900 dark:text-gray-100 px-3.5 py-2.5 text-base focus:outline-none focus:border-emerald-600 " +
+    "focus:ring-4 focus:ring-emerald-600/15";
+const ETIQUETA = "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5";
+
+/** Registro (sin usuario, en la portada de acceso) y perfil (con usuario, en el marco de la app). */
+export default function UserForm({ props }) {
+    const { handleSubmit, handleChangeAvatar, user, enviando } = props;
+
+    if (!user) {
+        return (
+            <Portada paso="Registro" titulo="Crear una cuenta"
+                subtitulo="Regístrate para publicar casas y conversar con otros usuarios. Al entrar por primera vez configurarás la verificación en dos pasos.">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={ETIQUETA} htmlFor="name">Nombre</label>
+                            <input id="name" type="text" required name="name" autoComplete="given-name" className={CAMPO_PORTADA} />
+                        </div>
+                        <div>
+                            <label className={ETIQUETA} htmlFor="lastname">Apellido</label>
+                            <input id="lastname" type="text" required name="lastname" autoComplete="family-name" className={CAMPO_PORTADA} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className={ETIQUETA} htmlFor="email">Correo</label>
+                        <input id="email" type="email" required name="email" autoComplete="email" className={CAMPO_PORTADA} />
+                    </div>
+                    <div>
+                        <label className={ETIQUETA} htmlFor="password">Contraseña</label>
+                        <input id="password" type="password" required minLength="8" name="password" autoComplete="new-password" className={CAMPO_PORTADA} />
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Mínimo 8 caracteres, con una mayúscula, una minúscula, un número y un carácter especial.</p>
+                    </div>
+                    <ZonaImagen id="avatar" nombre="avatar" etiqueta="Foto de perfil (opcional)" onChange={handleChangeAvatar} />
+                    <button type="submit" disabled={enviando} className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold py-3">Crear cuenta</button>
+                </form>
+                <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                    ¿Ya tienes cuenta? <Link to="/login" className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">Inicia sesión</Link>
+                </p>
+            </Portada>
+        );
+    }
 
     return (
-        <div className="max-w-md w-full mx-auto px-5 py-5">
-            <form onSubmit={handleSubmit} className="shadow-md rounded pt-6 pb-10 mb-4 px-10 bg-white dark:bg-gray-800">
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Name</label>
-                    <input type="text" required name="name" placeholder="Name" defaultValue={user?.name}
-                            className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Lastname</label>
-                    <input type="text" required name="lastname" placeholder="Lastname" defaultValue={user?.lastname}
-                        className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Email</label>
-                    <input type="email" required name="email" placeholder="Email" defaultValue={user?.email}
-                    className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                {user ? null :
-                (<div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Password</label>
-                    <input type="password" required name="password" placeholder="Password" className="shadow appearance-none border rounded w-full focus:shadow-outline bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600" />
-                </div>
-                )}
-                <div className="flex items-center justify-center w-full">
-                    <label htmlFor="avatar" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                <path stroke="currentColor" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                            </svg>
-                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+        <div className="pg pg--angosta">
+            <CabeceraPagina antetitulo="Cuenta" titulo="Mi perfil" descripcion="Actualiza tu nombre, tu correo y tu foto de perfil." />
+            <form onSubmit={handleSubmit}>
+                <Tarjeta titulo="Datos personales">
+                    <div className="pg-rejilla">
+                        <Campo id="name" etiqueta="Nombre">
+                            <input id="name" type="text" required name="name" defaultValue={user.name} autoComplete="given-name" className="pg-entrada" />
+                        </Campo>
+                        <Campo id="lastname" etiqueta="Apellido">
+                            <input id="lastname" type="text" required name="lastname" defaultValue={user.lastname} autoComplete="family-name" className="pg-entrada" />
+                        </Campo>
+                        <Campo id="email" etiqueta="Correo" ancho="completo">
+                            <input id="email" type="email" required name="email" defaultValue={user.email} autoComplete="email" className="pg-entrada" />
+                        </Campo>
+                        <div className="pg-campo pg-campo--completo">
+                            <ZonaImagen id="avatar" nombre="avatar" etiqueta="Agregar foto de perfil" imagenActual={user.avatar} onChange={handleChangeAvatar} />
                         </div>
-                        <input id="avatar" name="avatar" accept="image/png, image/jpeg" type="file" className="hidden" onChange={handleChangeAvatar} />
-                    </label>
-                </div>
-                <div className="flex justify-center">
-                    <button className="bg-emerald-600 hover:bg-emerald-700 rounded text-white font-bold py-2 px-4">Save</button>
-                </div>
+                    </div>
+                    <div className="pg-pie-form">
+                        <button type="submit" disabled={enviando} className="pg-boton bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white">Guardar cambios</button>
+                    </div>
+                </Tarjeta>
             </form>
         </div>
     );
