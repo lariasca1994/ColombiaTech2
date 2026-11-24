@@ -38,7 +38,7 @@ jobs:
           # Nombre descriptivo del portal como remitente de los correos (no es un secreto).
           BREVO_REMITENTE_NOMBRE: "Alquiler de vivienda"
           # Node con los parches de octubre de 2026 (Brotli RCE, TLS, CA de eMudhra).
-          NODE_VERSION: "24.22.1"
+          NODE_VERSION: "24.22.3"
         run: |
           set -euo pipefail
           for nombre in BREVO_API_KEY BREVO_REMITENTE BREVO_REMITENTE_NOMBRE NODE_VERSION; do
